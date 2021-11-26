@@ -187,6 +187,7 @@ final class SelfUpdateCommands extends DrushCommands {
       'docker/local/nginx.conf',
       'docker/local/php-fpm-pool.conf',
       'docker/local/',
+      'drush/Commands/OpenShiftCommands.php',
     ];
 
     foreach ($map as $source) {
