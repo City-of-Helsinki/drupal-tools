@@ -2,8 +2,9 @@
 
 declare(strict_types = 1);
 
-namespace Drush\Commands;
+namespace Drush\Commands\helfi_drupal_tools;
 
+use Drush\Commands\DrushCommands;
 use Symfony\Component\Process\Process;
 
 /**
