@@ -62,6 +62,9 @@ final class OpenShiftCommands extends DrushCommands {
       $this->invokeOc(['whoami'], showOutput: FALSE);
     }
     catch (\Exception $e) {
+      if ($token === NULL) {
+        $token = $this->ask('You must obtain an API token by visiting https://oauth-openshift.apps.arodevtest.hel.fi/oauth/token/request (Token):');
+      }
       $this->invokeOc([
         'login',
         '--token=' . $token,
