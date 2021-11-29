@@ -93,6 +93,7 @@ final class SelfUpdateCommands extends DrushCommands {
     $map = [
       '.github/workflows/test.yml.dist' => '.github/workflows/test.yml',
       '.github/workflows/artifact.yml.dist' => '.github/workflows/artifact.yml',
+      '.github/workflows/update-config.yml.dist' => '.github/workflows/update-config.yml',
       '.gitignore.dist' => '.gitignore',
     ];
     $map += [
@@ -112,13 +113,13 @@ final class SelfUpdateCommands extends DrushCommands {
     ];
 
     foreach ($map as $source => $destination) {
-      // Fallback source to destination in case the filename is same on both.
+      // Fallback source to destination if source is not defined.
       if (is_numeric($source)) {
         $source = $destination;
       }
       $isDist = $this->fileIsDist($source);
 
-      // Update dist if the original .dist file exists and the
+      // Update the dist file if the original .dist file exists and the
       // non-dist one does not.
       if ($isDist && (file_exists($source) && !file_exists($destination))) {
         $this->copyFile($source, $source);
