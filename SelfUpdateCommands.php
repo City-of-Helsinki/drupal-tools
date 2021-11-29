@@ -207,6 +207,12 @@ final class SelfUpdateCommands extends DrushCommands {
 
       // Copy remote file to given destination.
       if ($isRemote) {
+        $destination = $destination ?? $source;
+
+        // Created files should never be updated.
+        if (file_exists($destination)) {
+          continue;
+        }
         $this->copyFile($source, $destination ?? $source);
 
         continue;
