@@ -89,29 +89,7 @@ final class SelfUpdateCommands extends DrushCommands {
    * @return $this
    *   The self.
    */
-  private function updateFiles(bool $updateDist) : self {
-    $map = [
-      '.github/workflows/test.yml.dist' => '.github/workflows/test.yml',
-      '.github/workflows/artifact.yml.dist' => '.github/workflows/artifact.yml',
-      '.github/workflows/update-config.yml.dist' => '.github/workflows/update-config.yml',
-      '.gitignore.dist' => '.gitignore',
-    ];
-    $map += [
-      'public/sites/default/settings.php',
-      'docker/openshift/custom.locations',
-      'docker/openshift/Dockerfile',
-      'docker/openshift/entrypoints/20-deploy.sh',
-      'docker/openshift/crons/drupal.sh',
-      'docker/openshift/crons/migrate-status.php',
-      'docker/openshift/crons/migrate-tpr.sh',
-      'docker/openshift/crons/prestop-hook.sh',
-      'docker/openshift/crons/purge-queue.sh',
-      'docker/openshift/crons/update-translations.sh',
-      'docker-compose.yml',
-      'phpunit.xml.dist',
-      'phpunit.platform.xml',
-    ];
-
+  private function updateFiles(bool $updateDist, array $map) : self {
     foreach ($map as $source => $destination) {
       // Fallback source to destination if source is not defined.
       if (is_numeric($source)) {
@@ -174,29 +152,68 @@ final class SelfUpdateCommands extends DrushCommands {
   }
 
   /**
+   * Creates the given file with given content.
+   *
+   * @param string $source
+   *   The file.
+   * @param string|null $content
+   *   The content.
+   *
+   * @return bool
+   *   TRUE if file was created, false if not.
+   */
+  private function createFile(string $source, ?string $content = NULL) : bool {
+    if (file_exists($source)) {
+      return TRUE;
+    }
+    return file_put_contents($source, $content) !== FALSE;
+  }
+
+  /**
    * Remove old leftover files.
    *
    * @return $this
    *   The self.
    */
-  private function removeFiles(bool $updateDist) : self {
-    $map = [
-      'docker/local/Dockerfile',
-      'docker/local/custom.locations',
-      'docker/local/entrypoints/30-chromedriver.sh',
-      'docker/local/entrypoints/30-drush-server.sh',
-      'docker/local/nginx.conf',
-      'docker/local/php-fpm-pool.conf',
-      'docker/local/',
-      'drush/Commands/OpenShiftCommands.php',
-    ];
-
+  private function removeFiles(bool $updateDist, array $map) : self {
     foreach ($map as $source) {
       if (!$updateDist && $this->fileIsDist($source)) {
         continue;
       }
       if ($this->removeFile($source) !== DrushCommands::EXIT_SUCCESS) {
         throw new \InvalidArgumentException('Failed to remove file: ' . $source);
+      }
+    }
+    return $this;
+  }
+
+  /**
+   * Adds the given files.
+   *
+   * @return $this
+   *   The self.
+   */
+  private function addFiles(array $map) : self {
+    foreach ($map as $source => $settings) {
+      [
+        'remote' => $isRemote,
+        'content' => $content,
+        'destination' => $destination,
+      ] = $settings + [
+        'remote' => FALSE,
+        'content' => NULL,
+        'destination' => NULL,
+      ];
+
+      // Copy remote file to given destination.
+      if ($isRemote) {
+        $this->copyFile($source, $destination ?? $source);
+
+        continue;
+      }
+
+      if (!$this->createFile($source, $content)) {
+        throw new \InvalidArgumentException('Failed to create file: ' . $source);
       }
     }
     return $this;
@@ -218,8 +235,43 @@ final class SelfUpdateCommands extends DrushCommands {
       'update-dist' => $updateDist,
     ] = $this->parseOptions($options);
 
-    $this->updateFiles($updateDist)
-      ->removeFiles($updateDist);
+    $this
+      ->updateFiles($updateDist, [
+        '.github/workflows/test.yml.dist' => '.github/workflows/test.yml',
+        '.github/workflows/artifact.yml.dist' => '.github/workflows/artifact.yml',
+        '.github/workflows/update-config.yml.dist' => '.github/workflows/update-config.yml',
+        '.gitignore.dist' => '.gitignore',
+      ])
+      ->updateFiles($updateDist, [
+        'public/sites/default/settings.php',
+        'docker/openshift/custom.locations',
+        'docker/openshift/Dockerfile',
+        'docker/openshift/entrypoints/20-deploy.sh',
+        'docker/openshift/crons/drupal.sh',
+        'docker/openshift/crons/migrate-status.php',
+        'docker/openshift/crons/migrate-tpr.sh',
+        'docker/openshift/crons/prestop-hook.sh',
+        'docker/openshift/crons/purge-queue.sh',
+        'docker/openshift/crons/update-translations.sh',
+        'docker-compose.yml',
+        'phpunit.xml.dist',
+        'phpunit.platform.xml',
+      ])
+      ->removeFiles($updateDist, [
+        'docker/local/Dockerfile',
+        'docker/local/custom.locations',
+        'docker/local/entrypoints/30-chromedriver.sh',
+        'docker/local/entrypoints/30-drush-server.sh',
+        'docker/local/nginx.conf',
+        'docker/local/php-fpm-pool.conf',
+        'docker/local/',
+        'drush/Commands/OpenShiftCommands.php',
+      ])
+      ->addFiles([
+        'public/sites/default/all.settings.php' => [
+          'remote' => TRUE,
+        ],
+      ]);
 
     return DrushCommands::EXIT_SUCCESS;
   }
