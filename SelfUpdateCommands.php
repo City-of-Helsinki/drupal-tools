@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Drush\Commands\helfi_drupal_tools;
 
 use Drush\Commands\DrushCommands;
+use Drush\Utils\StringUtils;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
@@ -230,6 +231,41 @@ final class SelfUpdateCommands extends DrushCommands {
       }
     }
     return $this;
+  }
+
+  /**
+   * Updates individual files from platform.
+   *
+   * @param array $files
+   *   A comma delimited list of files to update.
+   * @param array $options
+   *   An array of options.
+   *
+   * @command helfi:tools:update-platform-files
+   *
+   * @return int
+   *   The exit code.
+   */
+  public function updatePlatformFiles(array $files, array $options = [
+    'update-dist' => TRUE,
+  ]) : int {
+    if (count($files) < 1) {
+      throw new \InvalidArgumentException('You must provide at least one file.');
+    }
+    $files = StringUtils::csvToArray($files);
+
+    [
+      'update-dist' => $updateDist,
+    ] = $this->parseOptions($options);
+
+    foreach ($files as $file) {
+      [$source, $destination] = explode('=', $file) + [NULL, NULL];
+
+      $destination ? $this->updateFiles($updateDist, [$source => $destination]) :
+        $this->updateFiles($updateDist, [0 => $source]);
+    }
+
+    return DrushCommands::EXIT_SUCCESS;
   }
 
   /**
