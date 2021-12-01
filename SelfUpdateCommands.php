@@ -65,7 +65,7 @@ final class SelfUpdateCommands extends DrushCommands {
    * Parses given options.
    *
    * @param array $options
-   *   The options to parse.
+   *   A list of options to parse.
    *
    * @return array
    *   The options.
@@ -85,6 +85,8 @@ final class SelfUpdateCommands extends DrushCommands {
    *
    * @param bool $updateDist
    *   Whether to update dist files or not.
+   * @param array $map
+   *   A list of files to update.
    *
    * @return $this
    *   The self.
@@ -97,8 +99,10 @@ final class SelfUpdateCommands extends DrushCommands {
       }
       $isDist = $this->fileIsDist($source);
 
-      // Update the dist file if the original .dist file exists and the
-      // non-dist one does not.
+      // Update the given dist file only if the original (.dist) file exists and
+      // the destination one does not.
+      // For example: '.github/workflows/test.yml.dist' should not be added
+      // again if '.github/workflows/test.yml' exists unless explicitly told so.
       if ($isDist && (file_exists($source) && !file_exists($destination))) {
         $this->copyFile($source, $source);
         continue;
@@ -172,14 +176,14 @@ final class SelfUpdateCommands extends DrushCommands {
   /**
    * Remove old leftover files.
    *
+   * @param array $map
+   *   A list of files to remove.
+   *
    * @return $this
    *   The self.
    */
-  private function removeFiles(bool $updateDist, array $map) : self {
+  private function removeFiles(array $map) : self {
     foreach ($map as $source) {
-      if (!$updateDist && $this->fileIsDist($source)) {
-        continue;
-      }
       if ($this->removeFile($source) !== DrushCommands::EXIT_SUCCESS) {
         throw new \InvalidArgumentException('Failed to remove file: ' . $source);
       }
@@ -189,6 +193,9 @@ final class SelfUpdateCommands extends DrushCommands {
 
   /**
    * Adds the given files.
+   *
+   * @param array $map
+   *   A list of files to add.
    *
    * @return $this
    *   The self.
@@ -263,7 +270,7 @@ final class SelfUpdateCommands extends DrushCommands {
         'phpunit.xml.dist',
         'phpunit.platform.xml',
       ])
-      ->removeFiles($updateDist, [
+      ->removeFiles([
         'docker/local/Dockerfile',
         'docker/local/custom.locations',
         'docker/local/entrypoints/30-chromedriver.sh',
