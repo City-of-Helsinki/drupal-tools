@@ -40,6 +40,29 @@ final class SelfUpdateCommands extends DrushCommands {
   }
 
   /**
+   * Make sure the destination folder exists.
+   *
+   * @param string $destination
+   *   The destination file.
+   */
+  private function ensureFolder(string $destination) : void {
+    $parts = explode('/', $destination);
+    array_pop($parts);
+
+    if (count($parts) === 0) {
+      return;
+    }
+
+    $folder = implode('/', $parts);
+
+    if (!is_dir($folder)) {
+      if (!mkdir($folder, 0755, TRUE)) {
+        throw new \InvalidArgumentException('Failed to create folder: ' . $folder);
+      }
+    }
+  }
+
+  /**
    * Copies source file to destination.
    *
    * @param string $source
@@ -52,10 +75,11 @@ final class SelfUpdateCommands extends DrushCommands {
    */
   private function copyFile(string $source, string $destination) : bool {
     try {
+      $this->ensureFolder($destination);
       $resource = Utils::tryFopen($destination, 'w');
       $this->httpClient()->request('GET', $source, ['sink' => $resource]);
     }
-    catch (GuzzleException $e) {
+    catch (GuzzleException | \InvalidArgumentException $e) {
       $this->io()->error($e->getMessage());
       return FALSE;
     }
