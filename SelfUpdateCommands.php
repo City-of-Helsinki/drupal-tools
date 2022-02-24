@@ -106,6 +106,25 @@ final class SelfUpdateCommands extends DrushCommands {
   }
 
   /**
+   * Checks if file can be updated.
+   *
+   * @param string $file
+   *   The file.
+   *
+   * @return bool
+   *   TRUE if file can be updated automatically.
+   */
+  private function fileCanBeUpdated(string $file) : bool {
+    $isCI = getenv('CI');
+
+    if ($isCI) {
+      // Workflows cannot be updated in CI.
+      return !str_starts_with($file, '.github/workflows');
+    }
+    return TRUE;
+  }
+
+  /**
    * Updates files from platform.
    *
    * @param bool $updateDist
@@ -121,6 +140,10 @@ final class SelfUpdateCommands extends DrushCommands {
       // Fallback source to destination if source is not defined.
       if (is_numeric($source)) {
         $source = $destination;
+      }
+      // Check if we can update given file.
+      if (!$this->fileCanBeUpdated($source)) {
+        continue;
       }
       $isDist = $this->fileIsDist($source);
 
@@ -154,7 +177,7 @@ final class SelfUpdateCommands extends DrushCommands {
    *   Whether the given file is dist or not.
    */
   private function fileIsDist(string $file) : bool {
-    return str_starts_with($file, '.dist');
+    return str_ends_with($file, '.dist');
   }
 
   /**
