@@ -195,6 +195,26 @@ final class OpenShiftCommands extends DrushCommands {
   }
 
   /**
+   * Gets the database dump.
+   *
+   * @command helfi:oc:sanitize-database
+   *
+   * @return int
+   *   The exit code.
+   */
+  public function sanitizeDatabase() : int {
+    $process = $this->processManager()->process([
+      'drush',
+      'sql-query',
+      "UPDATE file_managed SET uri = REPLACE(uri, 'azure://', 'public://')",
+    ]);
+    $process->run(function ($type, $output) {
+      $this->io()->write($output);
+    });
+    return self::EXIT_SUCCESS;
+  }
+
+  /**
    * The OC login command.
    *
    * @param string $token

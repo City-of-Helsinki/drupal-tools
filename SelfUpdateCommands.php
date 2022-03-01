@@ -352,6 +352,8 @@ final class SelfUpdateCommands extends DrushCommands {
         'docker-compose.yml',
         'phpunit.xml.dist',
         'phpunit.platform.xml',
+        'tools/make/project/install.mk',
+        'tools/make/project/git.mk',
       ])
       ->removeFiles([
         'docker/local/Dockerfile',
