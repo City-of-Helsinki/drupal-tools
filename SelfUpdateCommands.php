@@ -141,7 +141,9 @@ final class SelfUpdateCommands extends DrushCommands {
       if (is_numeric($source)) {
         $source = $destination;
       }
-      // Check if we can update given file.
+      // Check if we can update given file. For example, we can't
+      // update GitHub workflow files in CI with our current GITHUB_TOKEN.
+      // @todo Remove this once we use token with more permissions.
       if (!$this->fileCanBeUpdated($source)) {
         continue;
       }
