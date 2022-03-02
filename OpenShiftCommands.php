@@ -195,7 +195,7 @@ final class OpenShiftCommands extends DrushCommands {
   }
 
   /**
-   * Gets the database dump.
+   * Sanitizes the current database.
    *
    * @command helfi:oc:sanitize-database
    *
