@@ -121,7 +121,7 @@ final class OpenShiftCommands extends DrushCommands {
 
     $fullCommand = 'oc ' . implode(' ', $command);
     $this->io()->note('Running: ' . $fullCommand);
-    $process = new Process(['oc', ...$command]);
+    $process = new Process(['oc', ...$command], timeout: 3600);
     $process->start();
 
     if (!$callback && $showOutput) {
