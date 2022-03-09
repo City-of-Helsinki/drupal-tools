@@ -151,10 +151,15 @@ final class OpenShiftCommands extends DrushCommands {
    *   The pod name.
    */
   private function getDrupalPodName(array $items) : string {
+    $deploymentConfigName = getenv('OC_DEPLOYMENT_CONFIG_NAME') ?: 'drupal';
+
     foreach ($items as $item) {
       $labels = $item->metadata->labels ?? NULL;
 
-      if ((!isset($labels->deploymentconfig)) || $labels->deploymentconfig !== 'drupal') {
+      if (
+        (!isset($labels->deploymentconfig)) ||
+        $labels->deploymentconfig !== $deploymentConfigName
+      ) {
         continue;
       }
       if ((!isset($item->status->phase)) || $item->status->phase !== 'Running') {
