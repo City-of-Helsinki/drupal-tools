@@ -341,6 +341,7 @@ final class SelfUpdateCommands extends DrushCommands {
         '.gitignore.dist' => '.gitignore',
       ])
       ->updateFiles($updateDist, [
+        'public/sites/default/azure.settings.php',
         'public/sites/default/settings.php',
         'docker/openshift/custom.locations',
         'docker/openshift/Dockerfile',
