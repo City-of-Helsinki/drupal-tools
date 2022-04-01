@@ -22,9 +22,9 @@ final class SelfUpdateCommands extends DrushCommands {
   /**
    * The http client.
    *
-   * @var \GuzzleHttp\ClientInterface
+   * @var null|\GuzzleHttp\ClientInterface
    */
-  private $httpClient;
+  private ?ClientInterface $httpClient = NULL;
 
   /**
    * Gets the http client.
