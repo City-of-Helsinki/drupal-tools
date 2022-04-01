@@ -318,6 +318,29 @@ final class SelfUpdateCommands extends DrushCommands {
   }
 
   /**
+   * Updates the dependencies.
+   *
+   * @param array $options
+   *   The options.
+   */
+  private function updateExternalPackages(array $options) : void {
+    if (empty($options['root'])) {
+      throw new \InvalidArgumentException('Missing drupal root.');
+    }
+    $gitRoot = sprintf('%s/..', rtrim($options['root'], '/'));
+
+    // Update druidfi/tools if the package exists.
+    if (is_dir($gitRoot . '/tools')) {
+      $this->processManager()->process([
+        'make',
+        'self-update',
+      ])->run(function (string $type, ?string $output) : void {
+        $this->io()->write($output);
+      });
+    }
+  }
+
+  /**
    * Updates files from platform.
    *
    * @param bool[] $options
@@ -332,6 +355,8 @@ final class SelfUpdateCommands extends DrushCommands {
     [
       'update-dist' => $updateDist,
     ] = $this->parseOptions($options);
+
+    $this->updateExternalPackages($options);
 
     $this
       ->updateFiles($updateDist, [
