@@ -188,6 +188,7 @@ final class OpenShiftCommands extends DrushCommands {
         $pod,
         'drush',
         'sql:dump',
+        '--structure-tables-key=common',
         '--result-file=/tmp/dump.sql',
       ]);
       $this->invokeOc([
