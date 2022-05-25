@@ -29,7 +29,7 @@ final class ComposerCommands extends DrushCommands {
   /**
    * Gets the update string for composer to all update packages to 'dev-main'.
    *
-   * @command helfi:composer:list-packages
+   * @command helfi:composer:get-update-string
    *
    * @return int
    *   The exit code.
