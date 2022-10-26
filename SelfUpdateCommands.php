@@ -396,6 +396,9 @@ final class SelfUpdateCommands extends DrushCommands {
         'drush/Commands/OpenShiftCommands.php',
       ])
       ->addFiles([
+        'docker/openshift/crons/base.sh' => [
+          'remote' => TRUE,
+        ],
         'public/sites/default/all.settings.php' => [
           'remote' => TRUE,
         ],
