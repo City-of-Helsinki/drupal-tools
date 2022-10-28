@@ -371,7 +371,6 @@ final class SelfUpdateCommands extends DrushCommands {
         'docker/openshift/custom.locations',
         'docker/openshift/Dockerfile',
         'docker/openshift/entrypoints/20-deploy.sh',
-        'docker/openshift/crons/drupal.sh',
         'docker/openshift/crons/content-scheduler.sh',
         'docker/openshift/crons/migrate-status.php',
         'docker/openshift/crons/migrate-tpr.sh',
@@ -387,6 +386,7 @@ final class SelfUpdateCommands extends DrushCommands {
       ])
       ->removeFiles([
         'docker/local/Dockerfile',
+        'docker/openshift/crons/drupal.sh',
         'docker/local/custom.locations',
         'docker/local/entrypoints/30-chromedriver.sh',
         'docker/local/entrypoints/30-drush-server.sh',
