@@ -385,6 +385,7 @@ final class SelfUpdateCommands extends DrushCommands {
         'tools/make/project/robo.mk',
         'tools/commit-msg',
         '.sonarcloud.properties',
+        '.github/pull_request_template.md'
       ])
       ->removeFiles([
         'docker/local/Dockerfile',
