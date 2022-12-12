@@ -16,6 +16,37 @@ use Symfony\Component\Yaml\Exception\ParseException;
 final class HelperCommands extends DrushCommands {
 
   /**
+   * Recursively get all config yml files.
+   *
+   * @param string $folder
+   *   The folder to scan.
+   *
+   * @return array
+   *   The files.
+   */
+  private function getFilesRecursive(string $folder) {
+    $iterator = new \RecursiveIteratorIterator(
+      new \RecursiveDirectoryIterator($folder)
+    );
+    $yamlIterator = new \RegexIterator($iterator, '/.+\.yml$/i', \RegexIterator::GET_MATCH);
+
+    $files = [];
+    foreach ($yamlIterator as $item) {
+      if (!is_array($item)) {
+        continue;
+      }
+      $file = reset($item);
+
+      if (!str_contains($file, '/config/')) {
+        continue;
+      }
+
+      $files[] = $file;
+    }
+    return $files;
+  }
+
+  /**
    * Clean yml files.
    */
   #[Command(name: 'helfi:tools:clean-yml')]
@@ -25,29 +56,28 @@ final class HelperCommands extends DrushCommands {
     }
     $realpath = rtrim($realpath, '/');
 
-    foreach (new \DirectoryIterator($realpath) as $file) {
-      if (!$file->isFile()) {
-        continue;
-      }
-      $filePath = sprintf('%s/%s', $realpath, $file->getFilename());
-
+    foreach ($this->getFilesRecursive($realpath) as $file) {
       try {
-        $content = Yaml::decode(file_get_contents($filePath));
+        $content = Yaml::decode(file_get_contents($file));
       }
       catch (ParseException) {
         continue;
       }
 
+      $hasChanges = FALSE;
       // Remove site specific fields from yaml files.
       foreach (['_core', 'uuid'] as $key) {
         if (!isset($content[$key])) {
           continue;
         }
         unset($content[$key]);
+        $hasChanges = TRUE;
       }
-      file_put_contents($filePath, Yaml::encode($content));
-    }
 
+      if ($hasChanges) {
+        file_put_contents($file, Yaml::encode($content));
+      }
+    }
   }
 
 }
