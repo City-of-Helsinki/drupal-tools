@@ -64,19 +64,32 @@ final class HelperCommands extends DrushCommands {
         continue;
       }
 
-      $hasChanges = FALSE;
       // Remove site specific fields from yaml files.
       foreach (['_core', 'uuid'] as $key) {
-        if (!isset($content[$key])) {
+        if (isset($content[$key])) {
           continue;
         }
         unset($content[$key]);
-        $hasChanges = TRUE;
       }
 
-      if ($hasChanges) {
-        file_put_contents($file, Yaml::encode($content));
+      // Remove paragraph target_bundles and dependencies.
+      if (
+        isset($content['settings']['handler_settings']) &&
+        $content['settings']['handler'] === 'default:paragraph'
+      ) {
+        foreach (['target_bundles', 'target_bundles_drag_drop'] as $key) {
+          $content['settings']['handler_settings'][$key] = [];
+        }
+
+        foreach ($content['dependencies']['config'] as $key => $value) {
+          if (!str_starts_with($value, 'paragraphs.paragraphs_type')) {
+            continue;
+          }
+          unset($content['dependencies']['config'][$key]);
+        }
       }
+
+      file_put_contents($file, Yaml::encode($content));
     }
   }
 
