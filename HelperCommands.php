@@ -66,7 +66,7 @@ final class HelperCommands extends DrushCommands {
 
       // Remove site specific fields from yaml files.
       foreach (['_core', 'uuid'] as $key) {
-        if (isset($content[$key])) {
+        if (!isset($content[$key])) {
           continue;
         }
         unset($content[$key]);
