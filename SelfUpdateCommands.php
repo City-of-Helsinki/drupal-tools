@@ -364,6 +364,7 @@ final class SelfUpdateCommands extends DrushCommands {
         '.github/workflows/artifact.yml.dist' => '.github/workflows/artifact.yml',
         '.github/workflows/update-config.yml.dist' => '.github/workflows/update-config.yml',
         '.gitignore.dist' => '.gitignore',
+        '.github/workflows/auto-release-pr.yml.dist' => '.github/workflows/auto-release-pr.yml',
       ])
       ->updateFiles($updateDist, [
         'public/sites/default/azure.settings.php',
