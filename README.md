@@ -1,5 +1,7 @@
 # Drupal tools
 
+Provides Drush commands to perform various tasks.
+
 ## Installation
 
 - `composer require drupal/helfi_drupal_tools`
