@@ -389,6 +389,7 @@ final class SelfUpdateCommands extends DrushCommands {
         'tools/commit-msg',
         '.sonarcloud.properties',
         '.github/pull_request_template.md',
+        'tests/dtt/ExistingSite/ModuleEnabledTest.php',
       ])
       ->removeFiles([
         'docker/local/Dockerfile',
