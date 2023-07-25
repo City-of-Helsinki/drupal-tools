@@ -373,6 +373,7 @@ final class SelfUpdateCommands extends DrushCommands {
         'docker/openshift/Dockerfile',
         'docker/openshift/entrypoints/20-deploy.sh',
         'docker/openshift/crons/content-scheduler.sh',
+        'docker/openshift/crons/migrate-hearings.sh',
         'docker/openshift/crons/migrate-status.php',
         'docker/openshift/crons/migrate-tpr.sh',
         'docker/openshift/crons/prestop-hook.sh',
