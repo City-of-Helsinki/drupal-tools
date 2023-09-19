@@ -384,7 +384,6 @@ final class SelfUpdateCommands extends DrushCommands {
         'phpunit.platform.xml',
         'tools/make/project/install.mk',
         'tools/make/project/git.mk',
-        'tools/make/project/robo.mk',
         'tools/make/project/theme.mk',
         'tools/commit-msg',
         '.sonarcloud.properties',
