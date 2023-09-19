@@ -378,6 +378,7 @@ final class SelfUpdateCommands extends DrushCommands {
         'docker/openshift/crons/prestop-hook.sh',
         'docker/openshift/crons/purge-queue.sh',
         'docker/openshift/crons/update-translations.sh',
+        'docker/openshift/crons/pubsub.sh',
         'docker/openshift/notify.php',
         'docker-compose.yml',
         'phpunit.xml.dist',
