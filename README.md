@@ -25,3 +25,8 @@ Update files from `drupal-platform` repository:
 Add `OC_PROJECT_NAME=hki-kanslia-{your-project-name}` to your `.env` file and run:
 
 - `drush helfi:oc:get-dump`
+
+
+## Contact
+
+Slack: #helfi-drupal (http://helsinkicity.slack.com/)
