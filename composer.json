@@ -3,6 +3,11 @@
     "type": "drupal-drush",
     "description": "Helfi - Drupal tools",
     "license": "GPL-2.0-or-later",
-    "minimum-stability": "dev"
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "DrupalTools\\": "src"
+        }
+    }
 }
 
