@@ -63,7 +63,14 @@ Running update hooks will create a file called `.platform/schema`. The file cont
 
 This can be disabled by passing `--no-run-migrations` flag.
 
-### Update hook Developer documentation
+## Database sync
+
+Add `OC_PROJECT_NAME=hki-kanslia-{your-project-name}` to your `.env` file and run:
+
+- `drush helfi:oc:get-dump`
+
+
+## Developing update hook
 
 The hooks should be defined in `src/Update/migrations.php` file and each hook should increment by one, just like `hook_update_N()` in Drupal.
 
@@ -75,7 +82,7 @@ The hook must return a `UpdateResult` object. You can optionally pass an array o
 
 An exception should be thrown if the update does not succeed.
 
-#### Run arbitrary commands
+### Run arbitrary commands
 
 Use Symfony's Process library to run commands:
 ```php
@@ -93,7 +100,7 @@ if (!$process->isSuccessful()) {
 }
 ```
 
-#### Remove files
+### Remove files
 
 Calling `$filemanager->removefiles()` multiple times should be safe, even if the file does not exist.
 
@@ -107,7 +114,7 @@ $fileManager->removeFiles($options, [
 ]);
 ```
 
-#### Adding files
+### Adding files
 
 This can be used to add new files once. Should contain a filename => settings array pairs.
 
@@ -131,7 +138,7 @@ $fileManager->addFiles($options, [
 ]);
 ```
 
-#### Update files
+### Update files
 
 Updates the given file from `drupal-helfi-platform` repository.
 
@@ -149,12 +156,10 @@ $fileManager->updateFiles($options, [
 ])
 ```
 
-## Database sync
+## Running tests
 
-Add `OC_PROJECT_NAME=hki-kanslia-{your-project-name}` to your `.env` file and run:
-
-- `drush helfi:oc:get-dump`
-
+- `composer install`
+- `vendor/bin/phpunit -c tests/phpunit.xml --bootstrap tests/bootstrap.php tests/`
 
 ## Contact
 

@@ -26,7 +26,7 @@ jobs:
 
       - name: Run PHPCS
         run: |
-          vendor/bin/phpcs . --standard=Drupal --extensions=php,module,inc,install,test,info
+          vendor/bin/phpcs --standard=Drupal
 
       - name: Run PHPUnit tests
         run: |
