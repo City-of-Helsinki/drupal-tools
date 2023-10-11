@@ -27,6 +27,9 @@ jobs:
       - name: Run PHPUnit tests
         run:
           vendor/bin/phpunit -c tests/phpunit.xml --bootstrap tests/bootstrap.php \
-          --coverage-clover=coverage.xml \
+          --coverage-clover=../coverage.xml \
           tests/
-          codecov
+
+      - name: Upload codecov
+        run: codecov
+
