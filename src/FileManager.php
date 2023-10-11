@@ -4,14 +4,30 @@ declare(strict_types = 1);
 
 namespace DrupalTools;
 
-use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Psr7\Utils;
-use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Process\Process;
+use Symfony\Component\Filesystem\Filesystem;
 
+/**
+ * The file manager service.
+ */
 final class FileManager {
 
-  public function __construct(private readonly SymfonyStyle $io) {
+  /**
+   * Constructs a new instance.
+   *
+   * @param \GuzzleHttp\ClientInterface $httpClient
+   *   The HTTP client.
+   * @param \Symfony\Component\Filesystem\Filesystem $filesystem
+   *   The filesystem.
+   * @param array $ignore
+   *   An array of filenames to ignore.
+   */
+  public function __construct(
+    private readonly ClientInterface $httpClient,
+    private readonly Filesystem $filesystem,
+    private readonly array $ignore,
+  ) {
   }
 
   /**
@@ -34,21 +50,42 @@ final class FileManager {
   }
 
   /**
-   * Updates files from platform.
+   * Checks if the given file should be ignored.
    *
-   * @param bool $updateDist
-   *   Whether to update dist files or not.
+   * @param string $file
+   *   The file to check.
+   *
+   * @return bool
+   *   TRUE if the file should be ignored.
+   */
+  private function ignoreFile(string $file) : bool {
+    return isset($this->ignore[$file]);
+  }
+
+  /**
+   * Updates files from Platform.
+   *
+   * @param \DrupalTools\UpdateOptions $options
+   *   The options.
    * @param array $map
    *   A list of files to update.
    *
    * @return $this
    *   The self.
+   *
+   * @throws \GuzzleHttp\Exception\GuzzleException
+   * @throws \Symfony\Component\Filesystem\Exception\IOException
    */
-  private function updateFiles(bool $updateDist, array $map) : self {
+  public function updateFiles(UpdateOptions $options, array $map) : self {
     foreach ($map as $source => $destination) {
-      // Fallback source to destination if source is not defined.
+      // Fallback source to destination if the source is not defined.
       if (is_numeric($source)) {
         $source = $destination;
+      }
+
+      // Allow files to be ignored.
+      if ($options->ignoreFiles && $this->ignoreFile($source)) {
+        continue;
       }
       // Check if we can update given file. For example, we can't
       // update GitHub workflow files in CI with our current GITHUB_TOKEN.
@@ -60,20 +97,19 @@ final class FileManager {
 
       // Update the given dist file only if the original (.dist) file exists and
       // the destination one does not.
-      // For example: '.github/workflows/test.yml.dist' should not be added
+      // For example, '.github/workflows/test.yml.dist' should not be added
       // again if '.github/workflows/test.yml' exists unless explicitly told so.
-      if ($isDist && (file_exists($source) && !file_exists($destination))) {
+      if ($isDist && ($this->filesystem->exists($source) && !$this->filesystem->exists($destination))) {
         $this->copyFile($source, $source);
+
         continue;
       }
 
       // Skip updating .dist files if configured so.
-      if (!$updateDist && $isDist) {
+      if (!$options->updateDist && $isDist) {
         continue;
       }
-      if (!$this->copyFile($source, $destination)) {
-        throw new \InvalidArgumentException(sprintf('Failed to copy %s to %s', $source, $destination));
-      }
+      $this->copyFile($source, $destination);
     }
     return $this;
   }
@@ -83,6 +119,8 @@ final class FileManager {
    *
    * @param string $destination
    *   The destination file.
+   *
+   * @throws \Symfony\Component\Filesystem\Exception\IOException
    */
   private function ensureFolder(string $destination) : void {
     $parts = explode('/', $destination);
@@ -94,11 +132,7 @@ final class FileManager {
 
     $folder = implode('/', $parts);
 
-    if (!is_dir($folder)) {
-      if (!mkdir($folder, 0755, TRUE)) {
-        throw new \InvalidArgumentException('Failed to create folder: ' . $folder);
-      }
-    }
+    $this->filesystem->mkdir($folder, 0755);
   }
 
   /**
@@ -111,17 +145,15 @@ final class FileManager {
    *
    * @return bool
    *   TRUE if succeeded, FALSE if not.
+   *
+   * @throws \GuzzleHttp\Exception\GuzzleException
+   * @throws \Symfony\Component\Filesystem\Exception\IOException
    */
   private function copyFile(string $source, string $destination) : bool {
-    try {
-      $this->ensureFolder($destination);
-      $resource = Utils::tryFopen($destination, 'w');
-      $this->httpClient()->request('GET', $source, ['sink' => $resource]);
-    }
-    catch (GuzzleException | \InvalidArgumentException $e) {
-      $this->io()->error($e->getMessage());
-      return FALSE;
-    }
+    $this->ensureFolder($source);
+    $resource = Utils::tryFopen($destination, 'w');
+    $this->httpClient->request('GET', $source, ['sink' => $resource]);
+
     return TRUE;
   }
 
@@ -139,29 +171,6 @@ final class FileManager {
   }
 
   /**
-   * Removes given file or directory from disk.
-   *
-   * @param string $source
-   *   The source file.
-   *
-   * @return int
-   *   The exit code.
-   */
-  private function removeFile(string $source) : int {
-    $command = is_dir($source) ? 'rmdir' : 'rm';
-
-    if (!file_exists($source)) {
-      return 0;
-    }
-    $process = new Process([$command, $source]);
-    return $process->run(function ($type, $buffer) {
-      $type === Process::ERR ?
-        $this->io()->error($buffer) :
-        $this->io()->writeln($buffer);
-    });
-  }
-
-  /**
    * Creates the given file with given content.
    *
    * @param string $source
@@ -169,30 +178,34 @@ final class FileManager {
    * @param string|null $content
    *   The content.
    *
-   * @return bool
-   *   TRUE if file was created, false if not.
+   * @throws \Symfony\Component\Filesystem\Exception\IOException
    */
-  private function createFile(string $source, ?string $content = NULL) : bool {
-    if (file_exists($source)) {
-      return TRUE;
+  private function createFile(string $source, ?string $content = NULL) : void {
+    if ($this->filesystem->exists($source)) {
+      return;
     }
-    return file_put_contents($source, $content) !== FALSE;
+    $this->filesystem->dumpFile($source, $content);
   }
 
   /**
    * Remove old leftover files.
    *
+   * @param \DrupalTools\UpdateOptions $options
+   *   The options.
    * @param array $map
    *   A list of files to remove.
    *
    * @return $this
    *   The self.
+   *
+   * @throws \Symfony\Component\Filesystem\Exception\IOException
    */
-  private function removeFiles(array $map) : self {
+  public function removeFiles(UpdateOptions $options, array $map) : self {
     foreach ($map as $source) {
-      if ($this->removeFile($source) !== DrushCommands::EXIT_SUCCESS) {
-        throw new \InvalidArgumentException('Failed to remove file: ' . $source);
+      if ($options->ignoreFiles && $this->ignoreFile($source)) {
+        continue;
       }
+      $this->filesystem->remove($source);
     }
     return $this;
   }
@@ -200,13 +213,18 @@ final class FileManager {
   /**
    * Adds the given files.
    *
+   * @param \DrupalTools\UpdateOptions $options
+   *   The options.
    * @param array $map
    *   A list of files to add.
    *
    * @return $this
    *   The self.
+   *
+   * @throws \GuzzleHttp\Exception\GuzzleException
+   * @throws \Symfony\Component\Filesystem\Exception\IOException
    */
-  private function addFiles(array $map) : self {
+  public function addFiles(UpdateOptions $options, array $map) : self {
     foreach ($map as $source => $settings) {
       [
         'remote' => $isRemote,
@@ -218,12 +236,15 @@ final class FileManager {
         'destination' => NULL,
       ];
 
+      if ($options->ignoreFiles && $this->ignoreFile($source)) {
+        continue;
+      }
       // Copy remote file to given destination.
       if ($isRemote) {
         $destination = $destination ?? $source;
 
         // Created files should never be updated.
-        if (file_exists($destination)) {
+        if ($this->filesystem->exists($destination)) {
           continue;
         }
         $this->copyFile($source, $destination ?? $source);
@@ -231,9 +252,7 @@ final class FileManager {
         continue;
       }
 
-      if (!$this->createFile($source, $content)) {
-        throw new \InvalidArgumentException('Failed to create file: ' . $source);
-      }
+      $this->createFile($source, $content);
     }
     return $this;
   }
