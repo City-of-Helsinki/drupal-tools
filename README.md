@@ -50,7 +50,7 @@ public/sites/default/settings.php
 docker/openshift/Dockerfile
 ```
 
-This check can be bypassed with `--no-ignore-files` flag. This will update files regardless of `ignore` file.
+This check can be bypassed with `--no-ignore-files` flag and will update the files regardless of `ignore` file.
 
 ### Update external tools
 
