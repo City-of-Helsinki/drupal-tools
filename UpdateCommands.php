@@ -5,11 +5,11 @@ declare(strict_types = 1);
 namespace Drush\Commands\helfi_drupal_tools;
 
 use Composer\InstalledVersions;
-use DrupalTools\FileManager;
-use DrupalTools\UpdateOptions;
+use DrupalTools\Update\FileManager;
+use DrupalTools\Update\UpdateOptions;
 use Drush\Attributes\Command;
 use Drush\Commands\DrushCommands;
-use DrupalTools\UpdateManager;
+use DrupalTools\Update\UpdateManager;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use Symfony\Component\Filesystem\Filesystem;
@@ -38,24 +38,27 @@ final class UpdateCommands extends DrushCommands {
   /**
    * The update manager.
    *
-   * @var \DrupalTools\UpdateManager
+   * @var \DrupalTools\Update\UpdateManager
    */
   private readonly UpdateManager $updateManager;
 
   /**
    * The file manager.
    *
-   * @var \DrupalTools\FileManager
+   * @var \DrupalTools\Update\FileManager
    */
   private readonly FileManager $fileManager;
 
+  /**
+   * Constructs a new instance.
+   */
   public function __construct() {
     $this->filesystem = new Filesystem();
     $this->httpClient = new Client(['base_uri' => self::BASE_URL]);
     $this->fileManager = new FileManager(
       $this->httpClient,
       $this->filesystem,
-      $this->getPlatformIgnore()
+      $this->getFileIgnores()
     );
     $this->updateManager = new UpdateManager(
       $this->filesystem,
@@ -64,7 +67,13 @@ final class UpdateCommands extends DrushCommands {
     );
   }
 
-  private function getPlatformIgnore() : array {
+  /**
+   * Gets the files to ignore.
+   *
+   * @return array
+   *   An array of ignored files.
+   */
+  private function getFileIgnores() : array {
     $ignoreFile = sprintf('%s/.platform/ignore', $this->gitRoot());
 
     if (!$this->filesystem->exists($ignoreFile)) {
@@ -76,6 +85,12 @@ final class UpdateCommands extends DrushCommands {
     return array_combine($files, $files);
   }
 
+  /**
+   * Gets the Git root.
+   *
+   * @return string
+   *   The git root.
+   */
   private function gitRoot() : string {
     static $gitRoot = NULL;
 
@@ -95,7 +110,7 @@ final class UpdateCommands extends DrushCommands {
    * @param array $options
    *   A list of options to parse.
    *
-   * @return \DrupalTools\UpdateOptions
+   * @return \DrupalTools\Update\UpdateOptions
    *   The options.
    */
   private function parseOptions(array $options) : UpdateOptions {
@@ -119,7 +134,7 @@ final class UpdateCommands extends DrushCommands {
   /**
    * Updates the dependencies.
    *
-   * @param \DrupalTools\UpdateOptions $options
+   * @param \DrupalTools\Update\UpdateOptions $options
    *   The update options.
    */
   private function updateExternalPackages(UpdateOptions $options) : void {
@@ -140,7 +155,7 @@ final class UpdateCommands extends DrushCommands {
   /**
    * Checks if the self-package needs to be updated.
    *
-   * @param \DrupalTools\UpdateOptions $options
+   * @param \DrupalTools\Update\UpdateOptions $options
    *   The update options.
    *
    * @return bool
@@ -169,7 +184,7 @@ final class UpdateCommands extends DrushCommands {
   }
 
   /**
-   * Updates files from platform.
+   * Updates files from Platform.
    *
    * @param bool[] $options
    *   The options.
@@ -189,7 +204,7 @@ final class UpdateCommands extends DrushCommands {
   ]) : int {
     $options = $this->parseOptions($options);
 
-    // Make sure everything all operations are relative to Git root.
+    // Make sure all operations are relative to Git root.
     chdir($this->gitRoot());
 
     if ($this->needsUpdate($options)) {
@@ -199,9 +214,16 @@ final class UpdateCommands extends DrushCommands {
     }
     $this->updateExternalPackages($options);
 
-    $this->updateManager->run();
+    $results = $this->updateManager->run($options);
 
-    return DrushCommands::EXIT_SUCCESS;
+    /** @var \DrupalTools\Update\UpdateResult $result */
+    foreach ($results as $result) {
+      $this->io()
+        ->writeln(array_map(fn (mixed $message) => $message,
+          $result->messages
+        ));
+    }
+
     $this
       ->fileManager
       ->updateFiles($options, [
@@ -235,22 +257,11 @@ final class UpdateCommands extends DrushCommands {
         '.sonarcloud.properties',
         '.github/pull_request_template.md',
         'tests/dtt/src/ExistingSite/ModuleEnabledTest.php',
-      ]);
-      /*->removeFiles([
-        'docker/local/Dockerfile',
-        'docker/openshift/crons/drupal.sh',
-        'docker/local/custom.locations',
-        'docker/local/entrypoints/30-chromedriver.sh',
-        'docker/local/entrypoints/30-drush-server.sh',
-        'docker/local/nginx.conf',
-        'docker/local/php-fpm-pool.conf',
-        'docker/local/',
-        'drush/Commands/OpenShiftCommands.php',
       ])
-      ->addFiles([
+      ->addFiles($options, [
         'docker/openshift/crons/base.sh' => ['remote' => TRUE],
         'public/sites/default/all.settings.php' => ['remote' => TRUE],
-      ]);*/
+      ]);
 
     return DrushCommands::EXIT_SUCCESS;
   }

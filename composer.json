@@ -8,7 +8,7 @@
         "psr-4": {
             "DrupalTools\\": "src"
         },
-        "files": [ "src/migrations.php" ]
+        "files": [ "src/Update/migrations.php" ]
     }
 }
 

@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace DrupalTools;
+namespace DrupalTools\Update;
 
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Psr7\Utils;
@@ -65,7 +65,7 @@ final class FileManager {
   /**
    * Updates files from Platform.
    *
-   * @param \DrupalTools\UpdateOptions $options
+   * @param \DrupalTools\Update\UpdateOptions $options
    *   The options.
    * @param array $map
    *   A list of files to update.
@@ -190,7 +190,7 @@ final class FileManager {
   /**
    * Remove old leftover files.
    *
-   * @param \DrupalTools\UpdateOptions $options
+   * @param \DrupalTools\Update\UpdateOptions $options
    *   The options.
    * @param array $map
    *   A list of files to remove.
@@ -213,7 +213,7 @@ final class FileManager {
   /**
    * Adds the given files.
    *
-   * @param \DrupalTools\UpdateOptions $options
+   * @param \DrupalTools\Update\UpdateOptions $options
    *   The options.
    * @param array $map
    *   A list of files to add.
