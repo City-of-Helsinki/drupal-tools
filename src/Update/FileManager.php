@@ -4,8 +4,7 @@ declare(strict_types = 1);
 
 namespace DrupalTools\Update;
 
-use GuzzleHttp\ClientInterface;
-use GuzzleHttp\Psr7\Utils;
+use DrupalTools\HttpFileManager;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
@@ -16,15 +15,15 @@ final class FileManager {
   /**
    * Constructs a new instance.
    *
-   * @param \GuzzleHttp\ClientInterface $httpClient
-   *   The HTTP client.
+   * @param \DrupalTools\HttpFileManager $httpFileManager
+   *   The HTTP file manager service.
    * @param \Symfony\Component\Filesystem\Filesystem $filesystem
    *   The filesystem.
    * @param array $ignore
    *   An array of filenames to ignore.
    */
   public function __construct(
-    private readonly ClientInterface $httpClient,
+    private readonly HttpFileManager $httpFileManager,
     private readonly Filesystem $filesystem,
     private readonly array $ignore,
   ) {
@@ -35,14 +34,14 @@ final class FileManager {
    *
    * @param string $file
    *   The file.
+   * @param \DrupalTools\Update\UpdateOptions $options
+   *   The update options.
    *
    * @return bool
    *   TRUE if file can be updated automatically.
    */
-  private function fileCanBeUpdated(string $file) : bool {
-    $isCI = getenv('CI');
-
-    if ($isCI) {
+  private function fileCanBeUpdated(string $file, UpdateOptions $options) : bool {
+    if ($options->isCI) {
       // Workflows cannot be updated in CI.
       return !str_starts_with($file, '.github/workflows');
     }
@@ -59,7 +58,7 @@ final class FileManager {
    *   TRUE if the file should be ignored.
    */
   private function ignoreFile(string $file) : bool {
-    return isset($this->ignore[$file]);
+    return in_array($file, $this->ignore);
   }
 
   /**
@@ -90,27 +89,23 @@ final class FileManager {
       // Check if we can update given file. For example, we can't
       // update GitHub workflow files in CI with our current GITHUB_TOKEN.
       // @todo Remove this once we use token with more permissions.
-      if (!$this->fileCanBeUpdated($source)) {
-        continue;
-      }
-      $isDist = $this->fileIsDist($source);
-
-      // Update the given dist file only if the original (.dist) file exists and
-      // the destination one does not.
-      // For example, '.github/workflows/test.yml.dist' should not be added
-      // again if '.github/workflows/test.yml' exists unless explicitly told so.
-      if ($isDist && ($this->filesystem->exists($source) && !$this->filesystem->exists($destination))) {
-        $this->copyFile($source, $source);
-
+      if (!$this->fileCanBeUpdated($source, $options)) {
         continue;
       }
 
-      // Skip updating .dist files if configured so.
-      if (!$options->updateDist && $isDist) {
-        continue;
+      if ($this->fileIsDist($source)) {
+        // .dist files require special handling because they are features
+        // that are usually disabled by default. For example, we update
+        // test.yml.dist like this: $map = ['test.yml.dist' => 'test.yml'],
+        // meaning test.yml.dist file will be updated as test.yml.
+        if (!$this->filesystem->exists($destination)) {
+          // Update the actual dist file if the destination does not exist.
+          $destination = $source;
+        }
       }
       $this->copyFile($source, $destination);
     }
+
     return $this;
   }
 
@@ -143,18 +138,12 @@ final class FileManager {
    * @param string $destination
    *   The destination.
    *
-   * @return bool
-   *   TRUE if succeeded, FALSE if not.
-   *
    * @throws \GuzzleHttp\Exception\GuzzleException
    * @throws \Symfony\Component\Filesystem\Exception\IOException
    */
-  private function copyFile(string $source, string $destination) : bool {
+  private function copyFile(string $source, string $destination) : void {
     $this->ensureFolder($source);
-    $resource = Utils::tryFopen($destination, 'w');
-    $this->httpClient->request('GET', $source, ['sink' => $resource]);
-
-    return TRUE;
+    $this->httpFileManager->copyFile($source, $destination);
   }
 
   /**
@@ -247,7 +236,7 @@ final class FileManager {
         if ($this->filesystem->exists($destination)) {
           continue;
         }
-        $this->copyFile($source, $destination ?? $source);
+        $this->copyFile($source, $destination);
 
         continue;
       }

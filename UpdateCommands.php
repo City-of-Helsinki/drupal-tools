@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace Drush\Commands\helfi_drupal_tools;
 
 use Composer\InstalledVersions;
+use DrupalTools\HttpFileManager;
 use DrupalTools\Update\FileManager;
 use DrupalTools\Update\UpdateManager;
 use DrupalTools\Update\UpdateOptions;
@@ -57,7 +58,11 @@ final class UpdateCommands extends DrushCommands {
 
     $this->filesystem = new Filesystem();
     $this->httpClient = new Client(['base_uri' => self::BASE_URL]);
-    $this->fileManager = new FileManager($this->httpClient, $this->filesystem, $this->getFileIgnores());
+    $this->fileManager = new FileManager(
+      new HttpFileManager($this->httpClient),
+      $this->filesystem,
+      $this->getFileIgnores()
+    );
     $this->updateManager = new UpdateManager(
       $this->filesystem,
       $this->fileManager,
@@ -122,7 +127,6 @@ final class UpdateCommands extends DrushCommands {
 
     return new UpdateOptions(
       ignoreFiles: $options['ignore-files'],
-      updateDist: $options['update-dist'],
       updateExternalPackages: $options['update-external-packages'],
       selfUpdate: $options['self-update'],
       runMigrations: $options['run-migrations'],
@@ -257,7 +261,6 @@ final class UpdateCommands extends DrushCommands {
    */
   #[Command(name: 'helfi:tools:update-platform')]
   public function updatePlatform(array $options = [
-    'update-dist' => TRUE,
     'ignore-files' => TRUE,
     'update-external-packages' => TRUE,
     'self-update' => TRUE,
@@ -265,6 +268,9 @@ final class UpdateCommands extends DrushCommands {
   ]) : int {
     $options = $this->parseOptions($options);
 
+    if (getenv('CI')) {
+      $options->isCI = TRUE;
+    }
     // Make sure all operations are relative to Git root.
     chdir($this->gitRoot());
 

@@ -14,21 +14,21 @@ final class UpdateOptions {
    *
    * @param bool $ignoreFiles
    *   Whether to allow files to be ignored.
-   * @param bool $updateDist
-   *   Whether to update '.dist' files.
    * @param bool $updateExternalPackages
    *   Whether to update external packages.
    * @param bool $selfUpdate
    *   Whether to check if package needs to be updated.
    * @param bool $runMigrations
    *   Whether to run migrations.
+   * @param bool $isCI
+   *   Whether we're operating in a CI environment.
    */
   public function __construct(
-    public readonly bool $ignoreFiles,
-    public readonly bool $updateDist,
-    public readonly bool $updateExternalPackages,
-    public readonly bool $selfUpdate,
-    public readonly bool $runMigrations,
+    public bool $ignoreFiles = TRUE,
+    public bool $updateExternalPackages = TRUE,
+    public bool $selfUpdate = TRUE,
+    public bool $runMigrations = TRUE,
+    public bool $isCI = FALSE,
   ) {
   }
 
