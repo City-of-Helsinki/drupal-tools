@@ -105,6 +105,8 @@ final class OpenShiftCommands extends DrushCommands {
    *   The commands to run.
    * @param callable|null $callback
    *   The callback.
+   * @param bool $showOutput
+   *   Whether to show output or not.
    *
    * @return int
    *   The exit code.

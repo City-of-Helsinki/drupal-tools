@@ -51,7 +51,13 @@ final class UpdateManager {
     $this->filesystem->dumpFile($this->schemaFile, $version);
   }
 
+  /**
+   * Attempts to run updates.
+   */
   public function run(UpdateOptions $options) : array {
+    if (!$options->runMigrations) {
+      return [];
+    }
     $schema = ($this->getSchemaVersion() + 1);
 
     $results = [];

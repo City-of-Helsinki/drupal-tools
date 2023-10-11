@@ -6,10 +6,10 @@ namespace Drush\Commands\helfi_drupal_tools;
 
 use Composer\InstalledVersions;
 use DrupalTools\Update\FileManager;
+use DrupalTools\Update\UpdateManager;
 use DrupalTools\Update\UpdateOptions;
 use Drush\Attributes\Command;
 use Drush\Commands\DrushCommands;
-use DrupalTools\Update\UpdateManager;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use Symfony\Component\Filesystem\Filesystem;
@@ -53,13 +53,11 @@ final class UpdateCommands extends DrushCommands {
    * Constructs a new instance.
    */
   public function __construct() {
+    parent::__construct();
+
     $this->filesystem = new Filesystem();
     $this->httpClient = new Client(['base_uri' => self::BASE_URL]);
-    $this->fileManager = new FileManager(
-      $this->httpClient,
-      $this->filesystem,
-      $this->getFileIgnores()
-    );
+    $this->fileManager = new FileManager($this->httpClient, $this->filesystem, $this->getFileIgnores());
     $this->updateManager = new UpdateManager(
       $this->filesystem,
       $this->fileManager,
@@ -114,11 +112,11 @@ final class UpdateCommands extends DrushCommands {
    *   The options.
    */
   private function parseOptions(array $options) : UpdateOptions {
-    $items = [];
     foreach ($options as $key => $value) {
       // Convert (string) true and false to proper booleans.
+      // This seems to be fixed in Drush 11, but keep this for BC.
       if (is_string($value) && (strtolower($value) === 'true' || strtolower($value) === 'false')) {
-        $items[$key] = strtolower($value) === 'true';
+        $options[$key] = strtolower($value) === 'true';
       }
     }
 
@@ -184,6 +182,69 @@ final class UpdateCommands extends DrushCommands {
   }
 
   /**
+   * Contains a list of files that should be updated by default.
+   *
+   * @param \DrupalTools\Update\UpdateOptions $options
+   *   The update options.
+   *
+   * @return self
+   *   The self.
+   */
+  private function updateDefaultFiles(UpdateOptions $options) : self {
+    $this->fileManager
+      ->updateFiles($options, [
+        'public/sites/default/azure.settings.php',
+        'public/sites/default/settings.php',
+        'docker/openshift/custom.locations',
+        'docker/openshift/Dockerfile',
+        'docker/openshift/entrypoints/20-deploy.sh',
+        'docker/openshift/crons/content-scheduler.sh',
+        'docker/openshift/crons/migrate-status.php',
+        'docker/openshift/crons/migrate-tpr.sh',
+        'docker/openshift/crons/prestop-hook.sh',
+        'docker/openshift/crons/purge-queue.sh',
+        'docker/openshift/crons/update-translations.sh',
+        'docker/openshift/crons/pubsub.sh',
+        'docker/openshift/notify.php',
+        'docker-compose.yml',
+        'phpunit.xml.dist',
+        'phpunit.platform.xml',
+        'tools/make/project/install.mk',
+        'tools/make/project/git.mk',
+        'tools/make/project/theme.mk',
+        'tools/commit-msg',
+        '.sonarcloud.properties',
+        '.github/pull_request_template.md',
+        'tests/dtt/src/ExistingSite/ModuleEnabledTest.php',
+      ])
+      ->updateFiles($options, [
+        '.github/workflows/test.yml.dist' => '.github/workflows/test.yml',
+        '.github/workflows/artifact.yml.dist' => '.github/workflows/artifact.yml',
+        '.github/workflows/update-config.yml.dist' => '.github/workflows/update-config.yml',
+        '.gitignore.dist' => '.gitignore',
+        '.github/workflows/auto-release-pr.yml.dist' => '.github/workflows/auto-release-pr.yml',
+      ]);
+    return $this;
+  }
+
+  /**
+   * Files that should always be added by default.
+   *
+   * @param \DrupalTools\Update\UpdateOptions $options
+   *   The options.
+   *
+   * @return self
+   *   The self.
+   */
+  private function addDefaultFiles(UpdateOptions $options) : self {
+    $this->fileManager->addFiles($options, [
+      'docker/openshift/crons/base.sh' => ['remote' => TRUE],
+      'public/sites/default/all.settings.php' => ['remote' => TRUE],
+    ]);
+    return $this;
+  }
+
+  /**
    * Updates files from Platform.
    *
    * @param bool[] $options
@@ -224,44 +285,8 @@ final class UpdateCommands extends DrushCommands {
         ));
     }
 
-    $this
-      ->fileManager
-      ->updateFiles($options, [
-        '.github/workflows/test.yml.dist' => '.github/workflows/test.yml',
-        '.github/workflows/artifact.yml.dist' => '.github/workflows/artifact.yml',
-        '.github/workflows/update-config.yml.dist' => '.github/workflows/update-config.yml',
-        '.gitignore.dist' => '.gitignore',
-        '.github/workflows/auto-release-pr.yml.dist' => '.github/workflows/auto-release-pr.yml',
-      ])
-      ->updateFiles($options, [
-        'public/sites/default/azure.settings.php',
-        'public/sites/default/settings.php',
-        'docker/openshift/custom.locations',
-        'docker/openshift/Dockerfile',
-        'docker/openshift/entrypoints/20-deploy.sh',
-        'docker/openshift/crons/content-scheduler.sh',
-        'docker/openshift/crons/migrate-status.php',
-        'docker/openshift/crons/migrate-tpr.sh',
-        'docker/openshift/crons/prestop-hook.sh',
-        'docker/openshift/crons/purge-queue.sh',
-        'docker/openshift/crons/update-translations.sh',
-        'docker/openshift/crons/pubsub.sh',
-        'docker/openshift/notify.php',
-        'docker-compose.yml',
-        'phpunit.xml.dist',
-        'phpunit.platform.xml',
-        'tools/make/project/install.mk',
-        'tools/make/project/git.mk',
-        'tools/make/project/theme.mk',
-        'tools/commit-msg',
-        '.sonarcloud.properties',
-        '.github/pull_request_template.md',
-        'tests/dtt/src/ExistingSite/ModuleEnabledTest.php',
-      ])
-      ->addFiles($options, [
-        'docker/openshift/crons/base.sh' => ['remote' => TRUE],
-        'public/sites/default/all.settings.php' => ['remote' => TRUE],
-      ]);
+    $this->updateDefaultFiles($options)
+      ->addDefaultFiles($options);
 
     return DrushCommands::EXIT_SUCCESS;
   }
