@@ -48,7 +48,7 @@ public/sites/default/settings.php
 docker/openshift/Dockerfile
 ```
 
-This check can be bypassed with `--no-ignore-files` flag and the files will be processed regardless of `ignore` file.
+This check can be bypassed with `--no-ignore-files` flag, meaning the files will be processed regardless of `ignore` file.
 
 ### Update external tools
 
