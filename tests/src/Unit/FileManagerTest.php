@@ -174,10 +174,12 @@ class FileManagerTest extends UnitTestCase {
   /**
    * Tests that existing remote files are not overridden.
    */
-  public function testAddRemoteFileExisting() : void {
+  public function testRemoteFile() : void {
     $client = $this->prophesize(HttpFileManager::class);
     $client->copyFile('Dockerfile', 'Dockerfile')
       ->shouldNotBeCalled();
+    $client->copyFile('Dockerfile.3', 'Dockerfile.3')
+      ->shouldBeCalled();
     $filesystem = $this->prophesize(Filesystem::class);
     $filesystem->exists('Dockerfile')
       ->shouldBeCalled()
@@ -185,6 +187,9 @@ class FileManagerTest extends UnitTestCase {
     $filesystem->exists('Dockerfile.1')
       ->shouldBeCalled()
       ->willReturn(TRUE);
+    $filesystem->exists('Dockerfile.3')
+      ->shouldBeCalled()
+      ->willReturn(FALSE);
     $sut = new FileManager($client->reveal(), $filesystem->reveal(), [
       'Dockerfile',
     ]);
@@ -199,6 +204,12 @@ class FileManagerTest extends UnitTestCase {
     // Make sure destination fallbacks to source.
     $sut->addFiles(new UpdateOptions(ignoreFiles: FALSE), [
       'Dockerfile' => [
+        'remote' => TRUE,
+      ],
+    ]);
+    // Make sure a remote file that does not exist yet is added.
+    $sut->addFiles(new UpdateOptions(), [
+      'Dockerfile.3' => [
         'remote' => TRUE,
       ],
     ]);

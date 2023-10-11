@@ -60,13 +60,3 @@ jobs:
             --coverage-clover=$MODULE_FOLDER/coverage.xml \
             $MODULE_FOLDER
           codecov --rootDir $MODULE_FOLDER
-
-      - name: Create an artifact from test report
-        uses: actions/upload-artifact@v3
-        if: always()
-        with:
-          name: results
-          path: |
-            ${{ env.DRUPAL_ROOT }}/sites/simpletest/browser_output/
-            ${{ env.DRUPAL_ROOT }}/coverage.xml
-          retention-days: 1
