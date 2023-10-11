@@ -29,7 +29,9 @@ This will:
 
 ### Self update
 
-You should always update `drupal/helfi_drupal_tools` package before running the command.
+You should always update `drupal/helfi_drupal_tools` package before running the command:
+
+- `composer update drupal/helfi_drupal_tools`
 
 This check can be disabled by passing `--no-self-update` flag.
 
