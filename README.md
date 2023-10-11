@@ -37,9 +37,7 @@ This check can be disabled by passing `--no-self-update` flag.
 
 ### Auto updated files
 
-Certain files are deemed required and will always be updated.
-
-See [::updateDefaultFiles() and ::addDefaultFiles()](/UpdateCommands.php) methods for an up-to-date list of these files.
+Certain files are deemed required and will always be updated. See [::updateDefaultFiles() and ::addDefaultFiles()](/UpdateCommands.php) methods for an up-to-date list of these files.
 
 Files can be ignored by creating a file called `.platform/ignore`. The file should contain one file per line.
 
@@ -97,9 +95,9 @@ if (!$process->isSuccessful()) {
 
 #### Remove files
 
-Calling `$filemanager->removefiles()` multiple times should be safe, and will not fail if the file does not exist.
+Calling `$filemanager->removefiles()` multiple times should be safe, even if the file does not exist.
 
-You can either pass an entire folder or individual files.
+You can either pass an entire folder or individual files:
 
 ```php
 $fileManager->removeFiles($options, [
