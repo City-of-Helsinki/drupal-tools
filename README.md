@@ -43,7 +43,7 @@ See [::updateDefaultFiles() and ::addDefaultFiles()](/UpdateCommands.php) method
 
 Files can be ignored by creating a file called `.platform/ignore`. The file should contain one file per line.
 
-For example, add something like this to your `ignore` file to never update `settings.php` or `Dockerfile` files:
+For example, add something like this to your `ignore` file to never update `settings.php` and `Dockerfile` files:
 
 ```
 public/sites/default/settings.php
