@@ -23,7 +23,11 @@
         "psr-4": {
             "DrupalToolsTest\\": "tests/fixtures"
         },
-        "files": [ "tests/src/Unit/migration_fixture.php" ]
+        "files": [ "tests/fixtures/migration_fixture.php" ]
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
     }
 }
-

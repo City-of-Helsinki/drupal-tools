@@ -4,19 +4,19 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\helfi_drupal_tools\Unit;
 
-use Drupal\Tests\UnitTestCase;
 use DrupalTools\HttpFileManager;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Tests http file manager.
  *
  * @group helfi_drupal_tools
  */
-class HttpFileManagerTest extends UnitTestCase {
+class HttpFileManagerTest extends TestCase {
 
   /**
    * Creates HTTP client stub.
@@ -38,7 +38,7 @@ class HttpFileManagerTest extends UnitTestCase {
    * Tests copy file.
    */
   public function testCopyFile() : void {
-    $filename = '/tmp/' . $this->randomMachineName();
+    $filename = '/tmp/' . uniqid();
     $client = $this->createMockHttpClient([
       new Response(body: '123'),
     ]);

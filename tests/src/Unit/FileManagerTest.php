@@ -4,10 +4,10 @@ declare(strict_types = 1);
 
 namespace Drupal\Tests\helfi_drupal_tools\Unit;
 
-use Drupal\Tests\UnitTestCase;
 use DrupalTools\HttpFileManager;
 use DrupalTools\Update\FileManager;
 use DrupalTools\Update\UpdateOptions;
+use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prediction\CallPrediction;
 use Prophecy\Prediction\NoCallsPrediction;
@@ -18,7 +18,7 @@ use Symfony\Component\Filesystem\Filesystem;
  *
  * @group helfi_drupal_tools
  */
-class FileManagerTest extends UnitTestCase {
+class FileManagerTest extends TestCase {
 
   use ProphecyTrait;
 
