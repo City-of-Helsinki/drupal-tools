@@ -25,9 +25,8 @@ jobs:
         run: vendor/bin/phpcs --standard=Drupal --ignore=*/vendor/* .
 
       - name: Run PHPUnit tests
-        run: |
-          vendor/bin/phpunit \
-            --bootstrap tests/bootstrap.php \
-            -c tests/phpunit.xml \
-            --coverage-clover=coverage.xml
+        run:
+          vendor/bin/phpunit -c tests/phpunit.xml --bootstrap tests/bootstrap.php \
+          --coverage-clover=coverage.xml \
+          tests/
           codecov
