@@ -10,7 +10,7 @@ use Symfony\Component\Filesystem\Filesystem;
 /**
  * The file manager service.
  */
-final class FileManager {
+class FileManager {
 
   /**
    * Constructs a new instance.

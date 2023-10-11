@@ -9,7 +9,6 @@
   beStrictAboutOutputDuringTests="true"
   beStrictAboutChangesToGlobalState="true"
   beStrictAboutCoversAnnotation="false"
-  printerClass="\Drupal\Tests\Listeners\HtmlOutputPrinter"
   failOnRisky="true"
   failOnWarning="true"
   verbose="true">
@@ -21,26 +20,18 @@
 </php>
 <testsuites>
   <testsuite name="unit">
-    <directory>./tests/src/Unit</directory>
+    <directory>./src/Unit</directory>
   </testsuite>
   <testsuite name="kernel">
-    <directory>./tests/src/Kernel</directory>
+    <directory>./src/Kernel</directory>
   </testsuite>
   <testsuite name="functional">
-    <directory>./tests/src/Functional</directory>
+    <directory>./src/Functional</directory>
   </testsuite>
 </testsuites>
-<listeners>
-  <listener class="\Drupal\Tests\Listeners\DrupalListener">
-  </listener>
-</listeners>
 <coverage cacheDirectory=".phpunit.cache/code-coverage" processUncoveredFiles="true">
   <include>
-    <directory suffix=".php">./src</directory>
-    <file>./*.module</file>
+    <directory suffix=".php">../src</directory>
   </include>
-  <exclude>
-    <directory suffix=".php">./src/Fixture</directory>
-  </exclude>
 </coverage>
 </phpunit>

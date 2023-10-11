@@ -4,6 +4,15 @@
     "description": "Helfi - Drupal tools",
     "license": "GPL-2.0-or-later",
     "minimum-stability": "dev",
+    "require": {
+        "drush/drush": "^10 || ^11 || ^12"
+    },
+    "require-dev": {
+        "dealerdirect/phpcodesniffer-composer-installer": "^0.7.0",
+        "drupal/coder": "^8.3",
+        "phpspec/prophecy-phpunit": "^2",
+        "phpunit/phpunit": "^9.6"
+    },
     "autoload": {
         "psr-4": {
             "DrupalTools\\": "src"

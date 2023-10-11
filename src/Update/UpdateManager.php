@@ -9,7 +9,7 @@ use Symfony\Component\Filesystem\Filesystem;
 /**
  * A service to manage update hooks.
  */
-final class UpdateManager {
+class UpdateManager {
 
   /**
    * Constructs a new instance.
@@ -20,11 +20,14 @@ final class UpdateManager {
    *   The file manager service.
    * @param string $schemaFile
    *   The file to store the current schema version.
+   * @param string $scope
+   *   The namespace.
    */
   public function __construct(
     private readonly Filesystem $filesystem,
     private readonly FileManager $fileManager,
     private readonly string $schemaFile,
+    private readonly string $scope = __NAMESPACE__,
   ) {
   }
 
@@ -62,7 +65,7 @@ final class UpdateManager {
 
     $results = [];
     for ($i = $schema; $i < 1000; $i++) {
-      $function = sprintf('%s\drupal_tools_update_%d', __NAMESPACE__, $i);
+      $function = sprintf('%s\drupal_tools_update_%d', $this->scope, $i);
 
       if (!function_exists($function)) {
         break;
