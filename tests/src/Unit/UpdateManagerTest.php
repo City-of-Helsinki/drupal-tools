@@ -21,23 +21,64 @@ class UpdateManagerTest extends TestCase {
   use ProphecyTrait;
 
   /**
+   * The schema file.
+   *
+   * @var string
+   */
+  private string $schemaFile;
+
+  /**
+   * The file system.
+   *
+   * @var \Symfony\Component\Filesystem\Filesystem
+   */
+  private Filesystem $filesystem;
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp() : void {
+    parent::setUp();
+
+    $this->schemaFile = __DIR__ . '/../../fixtures/schema';
+    $this->filesystem = new Filesystem();
+    $this->filesystem->dumpFile($this->schemaFile, NULL);
+  }
+
+  /**
+   * Tests the schema with real filesystem.
+   */
+  public function testSchemaVersion() : void {
+    $manager = new UpdateManager(
+      new Filesystem(),
+      $this->prophesize(FileManager::class)->reveal(),
+      $this->schemaFile,
+      '\DrupalToolsTest',
+    );
+    $this->assertTrue($this->filesystem->exists($this->schemaFile));
+    $this->assertSame('', file_get_contents($this->schemaFile));
+
+    $manager->run(new UpdateOptions());
+    $this->assertEquals(2, file_get_contents($this->schemaFile));
+  }
+
+  /**
    * Tests update hooks.
    */
   public function testRun() : void {
-    $schemaFile = __DIR__ . '/../fixtures/schema';
     $fileManager = $this->prophesize(Filesystem::class);
-    $fileManager->exists($schemaFile)
+    $fileManager->exists($this->schemaFile)
       ->shouldBeCalled()
       ->willReturn(FALSE);
-    $fileManager->dumpFile($schemaFile, 1)
+    $fileManager->dumpFile($this->schemaFile, 1)
       ->shouldBeCalled();
-    $fileManager->dumpFile($schemaFile, 2)
+    $fileManager->dumpFile($this->schemaFile, 2)
       ->shouldBeCalled();
 
     $manager = new UpdateManager(
       $fileManager->reveal(),
       $this->prophesize(FileManager::class)->reveal(),
-      $schemaFile,
+      $this->schemaFile,
       '\DrupalToolsTest',
     );
     // Make sure no migrations are run when runMigrations is set to FALSE.

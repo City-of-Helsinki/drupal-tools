@@ -1,3 +1,5 @@
 vendor/
 composer.lock
 tests/.phpunit.cache
+tests/fixtures/schema
+tests/coverage.xml

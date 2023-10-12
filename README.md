@@ -161,7 +161,7 @@ $fileManager->updateFiles($options, [
 ## Running tests
 
 - `composer install`
-- `vendor/bin/phpunit -c tests/phpunit.xml --bootstrap tests/bootstrap.php tests/`
+- `vendor/bin/phpunit -c tests/phpunit.xml tests/`
 
 ## Contact
 
