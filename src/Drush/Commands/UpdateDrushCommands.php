@@ -141,7 +141,7 @@ final class UpdateDrushCommands extends DrushCommands {
    *   The update options.
    *
    * @return self
-   *    The self.
+   *   The self.
    */
   private function updateExternalPackages(UpdateOptions $options) : self {
     if (!$options->updateExternalPackages) {
