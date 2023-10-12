@@ -1,5 +1,7 @@
 # Drupal tools
 
+![CI](https://github.com/City-of-Helsinki/drupal-tools/workflows/CI/badge.svg) [![codecov](https://codecov.io/gh/City-of-Helsinki/drupal-tools/graph/badge.svg?token=DPQQ7001DP)](https://codecov.io/gh/City-of-Helsinki/drupal-tools)
+
 Provides Drush commands to perform various tasks.
 
 ## Installation
