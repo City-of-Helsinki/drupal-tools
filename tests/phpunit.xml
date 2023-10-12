@@ -34,6 +34,11 @@
     <include>
       <directory suffix=".php">../src</directory>
     </include>
+    <exclude>
+      <file>../src/Drush/Commands/HelperDrushCommands.php</file>
+      <file>../src/Drush/Commands/OpenShiftDrushCommands.php</file>
+      <file>../src/Drush/Commands/UpdateDrushCommands.php</file>
+    </exclude>
     <report>
       <clover outputFile="coverage.xml"/>
     </report>

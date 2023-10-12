@@ -5,7 +5,7 @@ declare(strict_types = 1);
 namespace Drupal\Tests\helfi_drupal_tools\Unit;
 
 use DrupalTools\Update\FileManager;
-use DrupalTools\Update\UpdateManager;
+use DrupalTools\Update\UpdateHookManager;
 use DrupalTools\Update\UpdateOptions;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
@@ -49,7 +49,7 @@ class UpdateManagerTest extends TestCase {
    * Tests the schema with real filesystem.
    */
   public function testSchemaVersion() : void {
-    $manager = new UpdateManager(
+    $manager = new UpdateHookManager(
       new Filesystem(),
       $this->prophesize(FileManager::class)->reveal(),
       $this->schemaFile,
@@ -75,7 +75,7 @@ class UpdateManagerTest extends TestCase {
     $fileManager->dumpFile($this->schemaFile, 2)
       ->shouldBeCalled();
 
-    $manager = new UpdateManager(
+    $manager = new UpdateHookManager(
       $fileManager->reveal(),
       $this->prophesize(FileManager::class)->reveal(),
       $this->schemaFile,

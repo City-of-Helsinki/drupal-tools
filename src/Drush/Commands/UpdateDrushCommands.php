@@ -7,7 +7,7 @@ namespace DrupalTools\Drush\Commands;
 use Composer\InstalledVersions;
 use DrupalTools\HttpFileManager;
 use DrupalTools\Update\FileManager;
-use DrupalTools\Update\UpdateManager;
+use DrupalTools\Update\UpdateHookManager;
 use DrupalTools\Update\UpdateOptions;
 use Drush\Attributes\Command;
 use Drush\Commands\DrushCommands;
@@ -40,9 +40,9 @@ final class UpdateDrushCommands extends DrushCommands {
   /**
    * The update manager.
    *
-   * @var \DrupalTools\Update\UpdateManager
+   * @var \DrupalTools\Update\UpdateHookManager
    */
-  private readonly UpdateManager $updateManager;
+  private readonly UpdateHookManager $updateHookManager;
 
   /**
    * The file manager.
@@ -64,7 +64,7 @@ final class UpdateDrushCommands extends DrushCommands {
       $this->filesystem,
       $this->getFileIgnores()
     );
-    $this->updateManager = new UpdateManager(
+    $this->updateHookManager = new UpdateHookManager(
       $this->filesystem,
       $this->fileManager,
       sprintf('%s/.platform/schema', $this->gitRoot()),
@@ -139,10 +139,13 @@ final class UpdateDrushCommands extends DrushCommands {
    *
    * @param \DrupalTools\Update\UpdateOptions $options
    *   The update options.
+   *
+   * @return self
+   *    The self.
    */
-  private function updateExternalPackages(UpdateOptions $options) : void {
+  private function updateExternalPackages(UpdateOptions $options) : self {
     if (!$options->updateExternalPackages) {
-      return;
+      return $this;
     }
     // Update druidfi/tools only if the package exists.
     if ($this->filesystem->exists($this->gitRoot() . '/tools')) {
@@ -153,6 +156,7 @@ final class UpdateDrushCommands extends DrushCommands {
         $this->io()->write($output);
       });
     }
+    return $this;
   }
 
   /**
@@ -184,6 +188,29 @@ final class UpdateDrushCommands extends DrushCommands {
       return TRUE;
     }
     return $selfVersion !== $latestCommit;
+  }
+
+  /**
+   * Runs update hooks.
+   *
+   * @param \DrupalTools\Update\UpdateOptions $options
+   *   The update options.
+   *
+   * @return self
+   *   The self.
+   */
+  private function runUpdateHooks(UpdateOptions $options) : self {
+    $results = $this->updateHookManager->run($options);
+
+    /** @var \DrupalTools\Update\UpdateResult $result */
+    foreach ($results as $result) {
+      $this->io()
+        ->writeln(array_map(fn (mixed $message) => $message,
+          $result->messages
+        ));
+    }
+
+    return $this;
   }
 
   /**
@@ -280,19 +307,9 @@ final class UpdateDrushCommands extends DrushCommands {
 
       return DrushCommands::EXIT_SUCCESS;
     }
-    $this->updateExternalPackages($options);
-
-    $results = $this->updateManager->run($options);
-
-    /** @var \DrupalTools\Update\UpdateResult $result */
-    foreach ($results as $result) {
-      $this->io()
-        ->writeln(array_map(fn (mixed $message) => $message,
-          $result->messages
-        ));
-    }
-
-    $this->updateDefaultFiles($options)
+    $this->updateExternalPackages($options)
+      ->runUpdateHooks($options)
+      ->updateDefaultFiles($options)
       ->addDefaultFiles($options);
 
     return DrushCommands::EXIT_SUCCESS;

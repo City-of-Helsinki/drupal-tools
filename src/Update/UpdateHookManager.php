@@ -9,7 +9,7 @@ use Symfony\Component\Filesystem\Filesystem;
 /**
  * A service to manage update hooks.
  */
-final class UpdateManager {
+final class UpdateHookManager {
 
   /**
    * Constructs a new instance.
