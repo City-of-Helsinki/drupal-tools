@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Drush\Commands\helfi_drupal_tools;
+namespace DrupalTools\Drush\Commands;
 
 use Drupal\Component\Serialization\Yaml;
 use Drush\Attributes\Command;
@@ -13,7 +13,7 @@ use Symfony\Component\Yaml\Exception\ParseException;
 /**
  * A Drush commandfile.
  */
-final class HelperCommands extends DrushCommands {
+final class HelperDrushCommands extends DrushCommands {
 
   /**
    * Recursively get all config yml files.

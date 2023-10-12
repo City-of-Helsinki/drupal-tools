@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Drush\Commands\helfi_drupal_tools;
+namespace DrupalTools\Drush\Commands;
 
 use Composer\InstalledVersions;
 use DrupalTools\HttpFileManager;
@@ -19,9 +19,10 @@ use Symfony\Component\Filesystem\Path;
 /**
  * A Drush commandfile.
  */
-final class UpdateCommands extends DrushCommands {
+final class UpdateDrushCommands extends DrushCommands {
 
   private const BASE_URL = 'https://raw.githubusercontent.com/City-of-Helsinki/drupal-helfi-platform/main/';
+
   /**
    * The http client.
    *

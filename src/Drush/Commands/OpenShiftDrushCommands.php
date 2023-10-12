@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Drush\Commands\helfi_drupal_tools;
+namespace DrupalTools\Drush\Commands;
 
 use Drush\Commands\DrushCommands;
 use Symfony\Component\Process\Process;
@@ -10,7 +10,7 @@ use Symfony\Component\Process\Process;
 /**
  * A Drush commandfile.
  */
-final class OpenShiftCommands extends DrushCommands {
+final class OpenShiftDrushCommands extends DrushCommands {
 
   /**
    * Make sure env variables are exposed.

@@ -33,7 +33,6 @@
   <coverage cacheDirectory=".phpunit.cache/code-coverage" processUncoveredFiles="true">
     <include>
       <directory suffix=".php">../src</directory>
-      <file>../UpdateCommands.php</file>
     </include>
     <report>
       <clover outputFile="coverage.xml"/>
