@@ -90,7 +90,7 @@ Use Symfony's Process library to run commands:
 ```php
 $process = new Process([
   'command',
-  '--argument1=something,'
+  '--argument1=something',
   '--argument2=something_else',
 ]);
 $process->run();
@@ -111,7 +111,7 @@ You can either pass an entire folder or individual files:
 ```php
 $fileManager->removeFiles($options, [
   'file1 to remove',
-  'file2 to remove'
+  'file2 to remove',
   'folder/to/remove',
 ]);
 ```
