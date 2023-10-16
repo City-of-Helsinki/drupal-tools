@@ -52,13 +52,12 @@ class UpdateManagerTest extends TestCase {
     $manager = new UpdateHookManager(
       new Filesystem(),
       $this->prophesize(FileManager::class)->reveal(),
-      $this->schemaFile,
       '\DrupalToolsTest',
     );
     $this->assertTrue($this->filesystem->exists($this->schemaFile));
     $this->assertSame('', file_get_contents($this->schemaFile));
 
-    $manager->run(new UpdateOptions());
+    $manager->run($this->schemaFile, new UpdateOptions());
     $this->assertEquals(2, file_get_contents($this->schemaFile));
   }
 
@@ -78,13 +77,12 @@ class UpdateManagerTest extends TestCase {
     $manager = new UpdateHookManager(
       $fileManager->reveal(),
       $this->prophesize(FileManager::class)->reveal(),
-      $this->schemaFile,
       '\DrupalToolsTest',
     );
     // Make sure no migrations are run when runMigrations is set to FALSE.
-    $this->assertEmpty($manager->run(new UpdateOptions(runMigrations: FALSE)));
+    $this->assertEmpty($manager->run($this->schemaFile, new UpdateOptions(runMigrations: FALSE)));
 
-    $results = $manager->run(new UpdateOptions());
+    $results = $manager->run($this->schemaFile, new UpdateOptions());
 
     $found = 0;
     foreach ($results as $result) {

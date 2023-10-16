@@ -27,7 +27,7 @@ class FileManagerTest extends TestCase {
    *
    * @dataProvider updateFilesIgnoreData
    */
-  public function testUpdateFilesIgnore(bool $ignoreFiles, array $files) : void {
+  public function testUpdateFilesIgnore(array $ignoreFiles, array $files) : void {
     $filesystem = $this->prophesize(Filesystem::class);
     $client = $this->prophesize(HttpFileManager::class);
 
@@ -40,9 +40,7 @@ class FileManagerTest extends TestCase {
     }
 
     $options = new UpdateOptions(ignoreFiles: $ignoreFiles);
-    $sut = new FileManager($client->reveal(), $filesystem->reveal(), [
-      'public/Dockerfile',
-    ]);
+    $sut = new FileManager($client->reveal(), $filesystem->reveal());
 
     $sut->updateFiles($options, [
       0 => 'public/sites/default/settings.php',
@@ -58,17 +56,17 @@ class FileManagerTest extends TestCase {
    */
   public function updateFilesIgnoreData() : array {
     return [
-      // Make sure files are ignored when ignoreFiles is set to TRUE.
+      // Make sure files are ignored when ignoreFiles is not empty.
       [
-        TRUE,
+        ['public/Dockerfile'],
         [
           'public/Dockerfile' => new NoCallsPrediction(),
           'public/sites/default/settings.php' => new CallPrediction(),
         ],
       ],
-      // Make sure files are not ignored when ignoreFiles is set to FALSE.
+      // Make sure files are not ignored when ignoreFiles is empty.
       [
-        FALSE,
+        [],
         [
           'public/Dockerfile' => new CallPrediction(),
           'public/sites/default/settings.php' => new CallPrediction(),
@@ -96,7 +94,7 @@ class FileManagerTest extends TestCase {
       ->shouldBeCalled();
 
     $options = new UpdateOptions();
-    $sut = new FileManager($client->reveal(), $filesystem->reveal(), []);
+    $sut = new FileManager($client->reveal(), $filesystem->reveal());
     // The test1.yml.dist should be updated as test1.yml because
     // test1.yml already exists.
     $sut->updateFiles($options, ['test1.yml.dist' => 'test1.yml']);
@@ -116,7 +114,7 @@ class FileManagerTest extends TestCase {
     $filesystem = $this->prophesize(Filesystem::class);
     // Certain files cannot be updated in CI environments.
     $options = new UpdateOptions(isCI: TRUE);
-    $sut = new FileManager($client->reveal(), $filesystem->reveal(), []);
+    $sut = new FileManager($client->reveal(), $filesystem->reveal());
     $sut->updateFiles($options, [
       '.github/workflows/test.yml' => '.github/workflows/test.yml',
     ]);
@@ -127,7 +125,7 @@ class FileManagerTest extends TestCase {
    *
    * @dataProvider addFilesIgnoreFilesData
    */
-  public function testAddFilesIgnoreFiles(bool $ignoreFiles, array $files) : void {
+  public function testAddFilesIgnoreFiles(array $ignoreFiles, array $files) : void {
     $client = $this->prophesize(HttpFileManager::class);
     $filesystem = $this->prophesize(Filesystem::class);
 
@@ -135,9 +133,7 @@ class FileManagerTest extends TestCase {
       $filesystem->exists($name)->should($prediction);
       $filesystem->dumpFile($name, '123')->should($prediction);
     }
-    $sut = new FileManager($client->reveal(), $filesystem->reveal(), [
-      'Dockerfile',
-    ]);
+    $sut = new FileManager($client->reveal(), $filesystem->reveal());
     $sut->addFiles(new UpdateOptions(ignoreFiles: $ignoreFiles), [
       'Dockerfile' => ['content' => '123'],
       'testfile' => ['content' => '123'],
@@ -152,17 +148,17 @@ class FileManagerTest extends TestCase {
    */
   public function addFilesIgnoreFilesData() : array {
     return [
-      // Make sure files are ignored when ignoreFiles is set to TRUE.
+      // Make sure files are ignored when ignoreFiles is not empty.
       [
-        TRUE,
+        ['Dockerfile'],
         [
           'Dockerfile' => new NoCallsPrediction(),
           'testfile' => new CallPrediction(),
         ],
       ],
-      // Make sure files are not ignored when ignoreFiles is set to FALSE.
+      // Make sure files are not ignored when ignoreFiles is empty.
       [
-        FALSE,
+        [],
         [
           'Dockerfile' => new CallPrediction(),
           'testfile' => new CallPrediction(),
@@ -190,19 +186,17 @@ class FileManagerTest extends TestCase {
     $filesystem->exists('Dockerfile.3')
       ->shouldBeCalled()
       ->willReturn(FALSE);
-    $sut = new FileManager($client->reveal(), $filesystem->reveal(), [
-      'Dockerfile',
-    ]);
-    // Set ignore files to FALSE, so we can also make sure ignored
+    $sut = new FileManager($client->reveal(), $filesystem->reveal());
+    // Make ignore files are not set, so we can also make sure ignored
     // files are not taken into account.
-    $sut->addFiles(new UpdateOptions(ignoreFiles: FALSE), [
+    $sut->addFiles(new UpdateOptions(ignoreFiles: []), [
       'Dockerfile' => [
         'remote' => TRUE,
         'destination' => 'Dockerfile.1',
       ],
     ]);
     // Make sure destination fallbacks to source.
-    $sut->addFiles(new UpdateOptions(ignoreFiles: FALSE), [
+    $sut->addFiles(new UpdateOptions(ignoreFiles: []), [
       'Dockerfile' => [
         'remote' => TRUE,
       ],
@@ -224,7 +218,7 @@ class FileManagerTest extends TestCase {
     $filesystem->exists('Dockerfile')
       ->shouldBeCalled()
       ->willReturn(TRUE);
-    $sut = new FileManager($client->reveal(), $filesystem->reveal(), []);
+    $sut = new FileManager($client->reveal(), $filesystem->reveal());
     $sut->addFiles(new UpdateOptions(), [
       'Dockerfile' => [
         'content' => '123',
@@ -250,7 +244,7 @@ class FileManagerTest extends TestCase {
       ->willReturn(FALSE);
     $filesystem->dumpFile('Dockerfile', '123')
       ->shouldBeCalled();
-    $sut = new FileManager($client->reveal(), $filesystem->reveal(), []);
+    $sut = new FileManager($client->reveal(), $filesystem->reveal());
     $sut->addFiles(new UpdateOptions(), [
       'Dockerfile' => [
         'content' => '123',
@@ -263,16 +257,14 @@ class FileManagerTest extends TestCase {
    *
    * @dataProvider removeIgnoreFilesData
    */
-  public function testRemoveIgnoreFiles(bool $ignoreFiles, array $files) : void {
+  public function testRemoveIgnoreFiles(array $ignoreFiles, array $files) : void {
     $client = $this->prophesize(HttpFileManager::class);
     $filesystem = $this->prophesize(Filesystem::class);
 
     foreach ($files as $name => $prediction) {
       $filesystem->remove($name)->should($prediction);
     }
-    $sut = new FileManager($client->reveal(), $filesystem->reveal(), [
-      'Dockerfile',
-    ]);
+    $sut = new FileManager($client->reveal(), $filesystem->reveal());
     $sut->removeFiles(new UpdateOptions(ignoreFiles: $ignoreFiles), array_keys($files));
   }
 
@@ -284,17 +276,17 @@ class FileManagerTest extends TestCase {
    */
   public function removeIgnoreFilesData() : array {
     return [
-      // Make sure files are ignored when ignoreFiles is set to TRUE.
+      // Make sure files are ignored when ignoreFiles is not empty.
       [
-        TRUE,
+        ['Dockerfile'],
         [
           'Dockerfile' => new NoCallsPrediction(),
           'folder/some' => new CallPrediction(),
         ],
       ],
-      // Make sure files are not ignored when ignoreFiles is set to FALSE.
+      // Make sure files are not ignored when ignoreFiles is empty.
       [
-        FALSE,
+        [],
         [
           'Dockerfile' => new CallPrediction(),
           'folder/some' => new CallPrediction(),

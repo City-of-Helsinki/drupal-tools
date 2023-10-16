@@ -19,13 +19,10 @@ class FileManager {
    *   The HTTP file manager service.
    * @param \Symfony\Component\Filesystem\Filesystem $filesystem
    *   The filesystem.
-   * @param array $ignore
-   *   An array of filenames to ignore.
    */
   public function __construct(
     private readonly HttpFileManager $httpFileManager,
     private readonly Filesystem $filesystem,
-    private readonly array $ignore,
   ) {
   }
 
@@ -53,12 +50,14 @@ class FileManager {
    *
    * @param string $file
    *   The file to check.
+   * @param array $ignoredFiles
+   *   The files to ignore.
    *
    * @return bool
    *   TRUE if the file should be ignored.
    */
-  private function ignoreFile(string $file) : bool {
-    return in_array($file, $this->ignore);
+  private function ignoreFile(string $file, array $ignoredFiles) : bool {
+    return in_array($file, $ignoredFiles);
   }
 
   /**
@@ -83,7 +82,7 @@ class FileManager {
       }
 
       // Allow files to be ignored.
-      if ($options->ignoreFiles && $this->ignoreFile($source)) {
+      if ($this->ignoreFile($source, $options->ignoreFiles)) {
         continue;
       }
       // Check if we can update given file. For example, we can't
@@ -191,7 +190,7 @@ class FileManager {
    */
   public function removeFiles(UpdateOptions $options, array $map) : self {
     foreach ($map as $source) {
-      if ($options->ignoreFiles && $this->ignoreFile($source)) {
+      if ($this->ignoreFile($source, $options->ignoreFiles)) {
         continue;
       }
       $this->filesystem->remove($source);
@@ -225,7 +224,7 @@ class FileManager {
         'destination' => NULL,
       ];
 
-      if ($options->ignoreFiles && $this->ignoreFile($source)) {
+      if ($this->ignoreFile($source, $options->ignoreFiles)) {
         continue;
       }
       // Copy remote file to given destination.

@@ -18,15 +18,12 @@ final class UpdateHookManager {
    *   The filesystem.
    * @param \DrupalTools\Update\FileManager $fileManager
    *   The file manager service.
-   * @param string $schemaFile
-   *   The file to store the current schema version.
    * @param string $scope
    *   The namespace.
    */
   public function __construct(
     private readonly Filesystem $filesystem,
     private readonly FileManager $fileManager,
-    private readonly string $schemaFile,
     private readonly string $scope = __NAMESPACE__,
   ) {
   }
@@ -37,11 +34,11 @@ final class UpdateHookManager {
    * @return int
    *   The schema version.
    */
-  private function getSchemaVersion() : int {
-    if (!$this->filesystem->exists($this->schemaFile)) {
+  private function getSchemaVersion(string $schemaFile) : int {
+    if (!$this->filesystem->exists($schemaFile)) {
       return 0;
     }
-    return (int) file_get_contents($this->schemaFile);
+    return (int) file_get_contents($schemaFile);
   }
 
   /**
@@ -49,19 +46,21 @@ final class UpdateHookManager {
    *
    * @param int $version
    *   The current schema version.
+   * @param string $schemaFile
+   *   The schema file.
    */
-  private function updateSchemaVersion(int $version) : void {
-    $this->filesystem->dumpFile($this->schemaFile, $version);
+  private function updateSchemaVersion(int $version, string $schemaFile) : void {
+    $this->filesystem->dumpFile($schemaFile, $version);
   }
 
   /**
    * Attempts to run updates.
    */
-  public function run(UpdateOptions $options) : array {
+  public function run(string $schemaFile, UpdateOptions $options) : array {
     if (!$options->runMigrations) {
       return [];
     }
-    $schema = ($this->getSchemaVersion() + 1);
+    $schema = ($this->getSchemaVersion($schemaFile) + 1);
 
     $results = [];
     for ($i = $schema; $i < 1000; $i++) {
@@ -75,7 +74,7 @@ final class UpdateHookManager {
         $this->fileManager,
         $this->filesystem
       );
-      $this->updateSchemaVersion($i);
+      $this->updateSchemaVersion($i, $schemaFile);
     }
     return $results;
   }

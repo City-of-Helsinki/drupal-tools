@@ -12,7 +12,7 @@ final class UpdateOptions {
   /**
    * Constructs a new instance.
    *
-   * @param bool $ignoreFiles
+   * @param array $ignoreFiles
    *   Whether to allow files to be ignored.
    * @param bool $updateExternalPackages
    *   Whether to update external packages.
@@ -24,7 +24,7 @@ final class UpdateOptions {
    *   Whether we're operating in a CI environment.
    */
   public function __construct(
-    public bool $ignoreFiles = TRUE,
+    public array $ignoreFiles = [],
     public bool $updateExternalPackages = TRUE,
     public bool $selfUpdate = TRUE,
     public bool $runMigrations = TRUE,

@@ -62,31 +62,11 @@ final class UpdateDrushCommands extends DrushCommands {
     $this->fileManager = new FileManager(
       new HttpFileManager($this->httpClient),
       $this->filesystem,
-      $this->getFileIgnores()
     );
     $this->updateHookManager = new UpdateHookManager(
       $this->filesystem,
       $this->fileManager,
-      sprintf('%s/.platform/schema', $this->gitRoot()),
     );
-  }
-
-  /**
-   * Gets the files to ignore.
-   *
-   * @return array
-   *   An array of ignored files.
-   */
-  private function getFileIgnores() : array {
-    $ignoreFile = sprintf('%s/.platform/ignore', $this->gitRoot());
-
-    if (!$this->filesystem->exists($ignoreFile)) {
-      return [];
-    }
-    $files = explode(PHP_EOL, file_get_contents($ignoreFile));
-    $files = array_filter(array_map('trim', $files));
-
-    return array_combine($files, $files);
   }
 
   /**
@@ -95,11 +75,11 @@ final class UpdateDrushCommands extends DrushCommands {
    * @return string
    *   The git root.
    */
-  private function gitRoot() : string {
+  private function gitRoot(string $root) : string {
     static $gitRoot = NULL;
 
     if (!$gitRoot) {
-      $gitRoot = Path::canonicalize(sprintf('%s/../../../', rtrim(__DIR__, '/')));
+      $gitRoot = Path::canonicalize(sprintf('%s/../', rtrim($root, '/')));
 
       if (!$this->filesystem->exists($gitRoot . '/.git')) {
         throw new \InvalidArgumentException('Failed to parse GIT root.');
@@ -113,11 +93,13 @@ final class UpdateDrushCommands extends DrushCommands {
    *
    * @param array $options
    *   A list of options to parse.
+   * @param string $root
+   *   The root directory.
    *
    * @return \DrupalTools\Update\UpdateOptions
    *   The options.
    */
-  private function parseOptions(array $options) : UpdateOptions {
+  private function parseOptions(array $options, string $root) : UpdateOptions {
     foreach ($options as $key => $value) {
       // Convert (string) true and false to proper booleans.
       // This seems to be fixed in Drush 11, but keep this for BC.
@@ -126,8 +108,20 @@ final class UpdateDrushCommands extends DrushCommands {
       }
     }
 
+    $ignoreFiles = [];
+    if ($options['ignore-files']) {
+      $ignoreFile = sprintf('%s/.platform/ignore', $root);
+
+      if ($this->filesystem->exists($ignoreFile)) {
+        $files = explode(PHP_EOL, file_get_contents($ignoreFile));
+        $files = array_filter(array_map('trim', $files));
+
+        $ignoreFiles = array_combine($files, $files);
+      }
+    }
+
     return new UpdateOptions(
-      ignoreFiles: $options['ignore-files'],
+      ignoreFiles: $ignoreFiles,
       updateExternalPackages: $options['update-external-packages'],
       selfUpdate: $options['self-update'],
       runMigrations: $options['run-migrations'],
@@ -139,16 +133,18 @@ final class UpdateDrushCommands extends DrushCommands {
    *
    * @param \DrupalTools\Update\UpdateOptions $options
    *   The update options.
+   * @param string $root
+   *   The root directory.
    *
    * @return self
    *   The self.
    */
-  private function updateExternalPackages(UpdateOptions $options) : self {
+  private function updateExternalPackages(UpdateOptions $options, string $root) : self {
     if (!$options->updateExternalPackages) {
       return $this;
     }
     // Update druidfi/tools only if the package exists.
-    if ($this->filesystem->exists($this->gitRoot() . '/tools')) {
+    if ($this->filesystem->exists($root . '/tools')) {
       $this->processManager()->process([
         'make',
         'self-update',
@@ -195,12 +191,15 @@ final class UpdateDrushCommands extends DrushCommands {
    *
    * @param \DrupalTools\Update\UpdateOptions $options
    *   The update options.
+   * @param string $root
+   *   The root directory.
    *
    * @return self
    *   The self.
    */
-  private function runUpdateHooks(UpdateOptions $options) : self {
-    $results = $this->updateHookManager->run($options);
+  private function runUpdateHooks(UpdateOptions $options, string $root) : self {
+    $schemaFile = sprintf('%s/.platform/schema', $root);
+    $results = $this->updateHookManager->run($schemaFile, $options);
 
     /** @var \DrupalTools\Update\UpdateResult $result */
     foreach ($results as $result) {
@@ -294,21 +293,25 @@ final class UpdateDrushCommands extends DrushCommands {
     'self-update' => TRUE,
     'run-migrations' => TRUE,
   ]) : int {
-    $options = $this->parseOptions($options);
+    if (empty($options['root'])) {
+      $this->io()->error('No root found.');
+    }
+    $root = $this->gitRoot($options['root']);
+    $options = $this->parseOptions($options, $root);
 
     if (getenv('CI')) {
       $options->isCI = TRUE;
     }
     // Make sure all operations are relative to Git root.
-    chdir($this->gitRoot());
+    chdir($root);
 
     if ($this->needsUpdate($options)) {
       $this->io()->writeln('<comment>drupal/helfi_drupal_tools is out of date. Please run "composer update drupal/helfi_drupal_tools" to update it and re-run this command.</comment>');
 
       return DrushCommands::EXIT_SUCCESS;
     }
-    $this->updateExternalPackages($options)
-      ->runUpdateHooks($options)
+    $this->updateExternalPackages($options, $root)
+      ->runUpdateHooks($options, $root)
       ->updateDefaultFiles($options)
       ->addDefaultFiles($options);
 
