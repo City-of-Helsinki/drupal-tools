@@ -48,3 +48,66 @@ function drupal_tools_update_2() : UpdateResult {
   return new UpdateResult($messages);
 
 }
+
+/**
+ * Install phpstan extensions.
+ */
+function drupal_tools_update_3() : UpdateResult {
+  $packages = [
+    'jangregor/phpstan-prophecy',
+    'mglaman/phpstan-drupal',
+    'phpstan/extension-installer',
+    'phpstan/phpstan',
+    'phpstan/phpstan-deprecation-rules',
+  ];
+
+  $missing = FALSE;
+  foreach ($packages as $package) {
+    $process = new Process(['composer', 'show', $package]);
+    $process->run();
+
+    if (!$process->isSuccessful() || $process->getExitCode() > 0) {
+      $missing = TRUE;
+      break;
+    }
+  }
+
+  if (!$missing) {
+    return new UpdateResult(['Skipped update because all dependencies are already installed.']);
+  }
+
+  $commands = [
+    [
+      'composer',
+      'config',
+      '--no-plugins',
+      'allow-plugins.phpstan/extension-installer',
+      'true',
+      '--no-interaction',
+      '--no-scripts',
+      '-vvvv',
+    ],
+    [
+      'composer',
+      'require',
+      '--dev',
+      ...$packages,
+      '--no-interaction',
+      '--no-scripts',
+      '--no-audit',
+      '-vvvv',
+    ],
+  ];
+
+  foreach ($commands as $command) {
+    $process = new Process($command);
+    $process->setTty(TRUE);
+    $process->run();
+
+    if (!$process->isSuccessful()) {
+      throw new \InvalidArgumentException($process->getErrorOutput());
+    }
+  }
+
+  return new UpdateResult();
+}
