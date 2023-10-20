@@ -9,6 +9,8 @@ declare(strict_types = 1);
 
 namespace DrupalTools\Update;
 
+use Composer\InstalledVersions;
+use Symfony\Component\Process\Exception\ProcessTimedOutException;
 use Symfony\Component\Process\Process;
 
 /**
@@ -63,15 +65,11 @@ function drupal_tools_update_3() : UpdateResult {
 
   $missing = FALSE;
   foreach ($packages as $package) {
-    $process = new Process(['composer', 'show', $package]);
-    $process->run();
-
-    if (!$process->isSuccessful() || $process->getExitCode() > 0) {
+    if (!InstalledVersions::isInstalled($package)) {
       $missing = TRUE;
       break;
     }
   }
-
   if (!$missing) {
     return new UpdateResult(['Skipped update because all dependencies are already installed.']);
   }
@@ -83,9 +81,6 @@ function drupal_tools_update_3() : UpdateResult {
       '--no-plugins',
       'allow-plugins.phpstan/extension-installer',
       'true',
-      '--no-interaction',
-      '--no-scripts',
-      '-vvvv',
     ],
     [
       'composer',
@@ -93,21 +88,21 @@ function drupal_tools_update_3() : UpdateResult {
       '--dev',
       ...$packages,
       '--no-interaction',
-      '--no-scripts',
       '--no-audit',
-      '-vvvv',
     ],
   ];
 
   foreach ($commands as $command) {
     $process = new Process($command);
     $process->setTty(TRUE);
-    $process->run();
 
-    if (!$process->isSuccessful()) {
-      throw new \InvalidArgumentException($process->getErrorOutput());
+    try {
+      $process->run();
+    }
+    catch (ProcessTimedOutException) {
+      // The command will most likely time-out to phpcs composer
+      // installer plugin. We don't actually care if it fails or not.
     }
   }
-
-  return new UpdateResult();
+  return new UpdateResult(['Attempted to install: ' . implode(' ', $packages)]);
 }
