@@ -54,16 +54,21 @@ final class UpdateDrushCommands extends DrushCommands {
   /**
    * Constructs a new instance.
    */
-  public function __construct() {
+  public function __construct(
+    Filesystem $filesystem = NULL,
+    ClientInterface $httpClient = NULL,
+    FileManager $fileManager = NULL,
+    UpdateHookManager $updateHookManager = NULL,
+  ) {
     parent::__construct();
 
-    $this->filesystem = new Filesystem();
-    $this->httpClient = new Client(['base_uri' => self::BASE_URL]);
-    $this->fileManager = new FileManager(
+    $this->filesystem = $filesystem ?: new Filesystem();
+    $this->httpClient = $httpClient ?: new Client(['base_uri' => self::BASE_URL]);
+    $this->fileManager = $fileManager ?: new FileManager(
       new HttpFileManager($this->httpClient),
       $this->filesystem,
     );
-    $this->updateHookManager = new UpdateHookManager(
+    $this->updateHookManager = $updateHookManager ?: new UpdateHookManager(
       $this->filesystem,
       $this->fileManager,
     );
@@ -143,6 +148,8 @@ final class UpdateDrushCommands extends DrushCommands {
     if (!$options->updateExternalPackages) {
       return $this;
     }
+    $this->io()->note('Checking external packages ...');
+
     // Update druidfi/tools only if the package exists.
     if ($this->filesystem->exists($root . '/tools')) {
       $this->processManager()->process([
@@ -198,6 +205,8 @@ final class UpdateDrushCommands extends DrushCommands {
    *   The self.
    */
   private function runUpdateHooks(UpdateOptions $options, string $root) : self {
+    $this->io()->note('Running update hooks ...');
+
     $schemaFile = sprintf('%s/.platform/schema', $root);
     $results = $this->updateHookManager->run($schemaFile, $options);
 
@@ -222,6 +231,7 @@ final class UpdateDrushCommands extends DrushCommands {
    *   The self.
    */
   private function updateDefaultFiles(UpdateOptions $options) : self {
+    $this->io()->note('Checking files ...');
     $this->fileManager
       ->updateFiles($options, [
         'public/sites/default/azure.settings.php',
@@ -306,7 +316,7 @@ final class UpdateDrushCommands extends DrushCommands {
     chdir($root);
 
     if ($this->needsUpdate($options)) {
-      $this->io()->writeln('<comment>drupal/helfi_drupal_tools is out of date. Please run "composer update drupal/helfi_drupal_tools" to update it and re-run this command.</comment>');
+      $this->io()->note('drupal/helfi_drupal_tools is out of date. Please run "composer update drupal/helfi_drupal_tools" to update it and re-run this command.');
 
       return DrushCommands::EXIT_SUCCESS;
     }

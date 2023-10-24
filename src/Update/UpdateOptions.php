@@ -13,7 +13,7 @@ final class UpdateOptions {
    * Constructs a new instance.
    *
    * @param array $ignoreFiles
-   *   Whether to allow files to be ignored.
+   *   Files to ignore. Leave empty to never ignore anything.
    * @param bool $updateExternalPackages
    *   Whether to update external packages.
    * @param bool $selfUpdate
