@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace DrupalTools\Drush\Commands;
 
+use Drush\Attributes\Command;
 use Drush\Commands\DrushCommands;
 use Symfony\Component\Process\Process;
 
@@ -153,21 +154,24 @@ final class OpenShiftDrushCommands extends DrushCommands {
    *   The pod name.
    */
   private function getDrupalPodName(array $items) : string {
-    $deploymentConfigName = getenv('OC_DEPLOYMENT_CONFIG_NAME') ?: 'drupal';
+    $deploymentConfigNames = [
+      getenv('OC_DEPLOYMENT_CONFIG_NAME') ?: '',
+      'drupal-cron',
+      'drupal',
+    ];
 
-    foreach ($items as $item) {
-      $labels = $item->metadata->labels ?? NULL;
-
-      if (
-        (!isset($labels->deploymentconfig)) ||
-        $labels->deploymentconfig !== $deploymentConfigName
-      ) {
-        continue;
+    foreach ($deploymentConfigNames as $name) {
+      foreach ($items as $item) {
+        if (!isset($item->metadata->labels->deploymentconfig)) {
+          continue;
+        }
+        if ((!isset($item->status->phase)) || $item->status->phase !== 'Running') {
+          continue;
+        }
+        if ($item->metadata->labels->deploymentconfig === $name) {
+          return $item->metadata->name;
+        }
       }
-      if ((!isset($item->status->phase)) || $item->status->phase !== 'Running') {
-        continue;
-      }
-      return $item->metadata->name;
     }
     throw new \InvalidArgumentException(dt('No running pod found.'));
   }
@@ -175,11 +179,10 @@ final class OpenShiftDrushCommands extends DrushCommands {
   /**
    * Gets the database dump.
    *
-   * @command helfi:oc:get-dump
-   *
    * @return int
    *   The exit code.
    */
+  #[Command(name: 'helfi:oc:get-dump')]
   public function getDatabaseDump() : int {
     $this->invokeOc(['get', 'pods', '-o', 'json'], callback: function ($output) {
       $data = json_decode($output);
@@ -191,6 +194,7 @@ final class OpenShiftDrushCommands extends DrushCommands {
         'drush',
         'sql:dump',
         '--structure-tables-key=common',
+        '--no-tablespaces',
         '--result-file=/tmp/dump.sql',
       ]);
       $this->invokeOc([
@@ -205,11 +209,10 @@ final class OpenShiftDrushCommands extends DrushCommands {
   /**
    * Sanitizes the current database.
    *
-   * @command helfi:oc:sanitize-database
-   *
    * @return int
    *   The exit code.
    */
+  #[Command(name: 'helfi:oc:sanitize-database')]
   public function sanitizeDatabase() : int {
     $process = $this->processManager()->process([
       'drush',
@@ -228,11 +231,10 @@ final class OpenShiftDrushCommands extends DrushCommands {
    * @param string $token
    *   The token.
    *
-   * @command helfi:oc:login
-   *
    * @return int
    *   The exit code.
    */
+  #[Command(name: 'helfi:oc:login')]
   public function login(string $token) : int {
     $this->ensureLoginDetails($token);
 
@@ -242,16 +244,15 @@ final class OpenShiftDrushCommands extends DrushCommands {
   /**
    * Checks whether user is logged in or not.
    *
-   * @command helfi:oc:whoami
-   *
    * @return int
    *   The exit code.
    */
+  #[Command(name: 'helfi:oc:whoami')]
   public function whoami() : int {
     try {
       $this->invokeOc(['whoami']);
     }
-    catch (\Exception $e) {
+    catch (\Exception) {
       return self::EXIT_FAILURE;
     }
     return self::EXIT_SUCCESS;
