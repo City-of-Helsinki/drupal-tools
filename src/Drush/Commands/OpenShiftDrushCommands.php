@@ -194,7 +194,7 @@ final class OpenShiftDrushCommands extends DrushCommands {
         'drush',
         'sql:dump',
         '--structure-tables-key=common',
-        '--no-tablespaces',
+        '--extra-dump="--no-tablespaces"',
         '--result-file=/tmp/dump.sql',
       ]);
       $this->invokeOc([
