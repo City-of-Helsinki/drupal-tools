@@ -94,7 +94,6 @@ function drupal_tools_update_3() : UpdateResult {
 
   foreach ($commands as $command) {
     $process = new Process($command);
-    $process->setTty(TRUE);
 
     try {
       $process->run();
