@@ -191,10 +191,17 @@ final class OpenShiftDrushCommands extends DrushCommands {
       $this->invokeOc([
         'rsh',
         $pod,
+        'rm',
+        '-f',
+        '/tmp/dump.sql',
+      ]);
+      $this->invokeOc([
+        'rsh',
+        $pod,
         'drush',
         'sql:dump',
         '--structure-tables-key=common',
-        '--extra-dump="--no-tablespaces"',
+        '--extra-dump=--no-tablespaces --hex-blob',
         '--result-file=/tmp/dump.sql',
       ]);
       $this->invokeOc([
