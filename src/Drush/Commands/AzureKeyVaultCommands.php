@@ -19,8 +19,17 @@ final class AzureKeyVaultCommands extends DrushCommands {
     $process->run();
   }
 
-  #[Command(name: 'helfi:tools:azure:update-secret')]
-  public function update() : int {
+  /**
+   * Updates the given KeyVault secret.
+   *
+   * @param array $options
+   *   The options.
+   *
+   * @return int
+   *   The exit code.
+   */
+  #[Command(name: 'helfi:azure:update-secret')]
+  public function update(array $options = []) : int {
     $this->invoceAz(['keyvault', 'list']);
     return DrushCommands::EXIT_SUCCESS;
   }
