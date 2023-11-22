@@ -1,0 +1,10 @@
+parameters:
+  fileExtensions:
+      - php
+  paths:
+    - ./
+  excludePaths:
+    - vendor
+  level: 6
+  checkMissingIterableValueType: false
+  treatPhpDocTypesAsCertain: false

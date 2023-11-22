@@ -50,7 +50,7 @@ final class UpdateHookManager {
    *   The schema file.
    */
   private function updateSchemaVersion(int $version, string $schemaFile) : void {
-    $this->filesystem->dumpFile($schemaFile, $version);
+    $this->filesystem->dumpFile($schemaFile, (string) $version);
   }
 
   /**
