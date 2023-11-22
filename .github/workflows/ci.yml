@@ -22,7 +22,7 @@ jobs:
         run: composer install
 
       - name: Run PHPCS
-        run: vendor/bin/phpcs --standard=Drupal,DrupalPractice --ignore=*/vendor/* .
+        run: vendor/bin/phpcs --ignore=*/vendor/* .
 
       - name: Run PHPUnit tests
         run:
