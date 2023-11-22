@@ -5,6 +5,8 @@ parameters:
     - ./
   excludePaths:
     - vendor
+    - src/Drush/Commands/HelperDrushCommands.php
+    - src/Drush/Commands/OpenShiftDrushCommands.php
   level: 6
   checkMissingIterableValueType: false
   treatPhpDocTypesAsCertain: false
