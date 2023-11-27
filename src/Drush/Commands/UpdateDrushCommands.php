@@ -281,6 +281,7 @@ final class UpdateDrushCommands extends DrushCommands {
     $this->fileManager->addFiles($options, [
       'docker/openshift/crons/base.sh' => ['remote' => TRUE],
       'public/sites/default/all.settings.php' => ['remote' => TRUE],
+      'phpstan.neon' => ['remote' => TRUE],
     ]);
     return $this;
   }
