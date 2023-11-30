@@ -22,7 +22,10 @@ jobs:
         run: composer install
 
       - name: Run PHPCS
-        run: vendor/bin/phpcs --standard=Drupal --ignore=*/vendor/* .
+        run: vendor/bin/phpcs --ignore=*/vendor/* .
+
+      - name: Run phpstan
+        run: vendor/bin/phpstan analyze -c phpstan.neon .
 
       - name: Run PHPUnit tests
         run:

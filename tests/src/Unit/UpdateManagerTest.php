@@ -42,7 +42,7 @@ class UpdateManagerTest extends TestCase {
 
     $this->schemaFile = __DIR__ . '/../../fixtures/schema';
     $this->filesystem = new Filesystem();
-    $this->filesystem->dumpFile($this->schemaFile, NULL);
+    $this->filesystem->dumpFile($this->schemaFile, '');
   }
 
   /**

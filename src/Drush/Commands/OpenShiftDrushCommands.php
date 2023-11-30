@@ -169,6 +169,9 @@ final class OpenShiftDrushCommands extends DrushCommands {
           continue;
         }
         if ($item->metadata->labels->deploymentconfig === $name) {
+          if (!isset($item->metadata->name)) {
+            throw new \InvalidArgumentException(dt('Cannot parse pod name.'));
+          }
           return $item->metadata->name;
         }
       }

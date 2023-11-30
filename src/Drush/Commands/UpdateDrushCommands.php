@@ -180,8 +180,8 @@ final class UpdateDrushCommands extends DrushCommands {
     if (!$latestCommit) {
       $body = $this->httpClient
         ->request('GET', 'https://api.github.com/repos/city-of-helsinki/drupal-tools/commits/main')
-        ?->getBody()
-        ?->getContents();
+        ->getBody()
+        ->getContents();
 
       $latestCommit = $body ? json_decode($body)?->sha : '';
     }
@@ -281,6 +281,7 @@ final class UpdateDrushCommands extends DrushCommands {
     $this->fileManager->addFiles($options, [
       'docker/openshift/crons/base.sh' => ['remote' => TRUE],
       'public/sites/default/all.settings.php' => ['remote' => TRUE],
+      'phpstan.neon' => ['remote' => TRUE],
     ]);
     return $this;
   }
@@ -288,7 +289,7 @@ final class UpdateDrushCommands extends DrushCommands {
   /**
    * Updates files from Platform.
    *
-   * @param bool[] $options
+   * @param array $options
    *   The options.
    *
    * @command helfi:tools:update-platform
