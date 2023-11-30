@@ -242,7 +242,6 @@ final class UpdateDrushCommands extends DrushCommands {
         'docker/openshift/entrypoints/10-preflight.sh',
         'docker/openshift/entrypoints/20-deploy.sh',
         'docker/openshift/crons/content-scheduler.sh',
-        'docker/openshift/crons/migrate-status.php',
         'docker/openshift/crons/migrate-tpr.sh',
         'docker/openshift/crons/prestop-hook.sh',
         'docker/openshift/crons/purge-queue.sh',
