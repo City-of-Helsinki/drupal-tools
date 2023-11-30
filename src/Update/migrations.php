@@ -105,3 +105,13 @@ function drupal_tools_update_3() : UpdateResult {
   }
   return new UpdateResult(['Attempted to install: ' . implode(' ', $packages)]);
 }
+
+/**
+ * Remove leftover files.
+ */
+function drupal_tools_update_4(UpdateOptions $options, FileManager $fileManager) : UpdateResult {
+  $fileManager->removeFiles($options, [
+    'docker/openshift/crons/migrate-status.php',
+  ]);
+  return new UpdateResult(['Attempted to remove migrate-status.php file.']);
+}
