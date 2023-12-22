@@ -115,3 +115,21 @@ function drupal_tools_update_4(UpdateOptions $options, FileManager $fileManager)
   ]);
   return new UpdateResult(['Attempted to remove migrate-status.php file.']);
 }
+
+function drupal_tools_update_5() : UpdateResult {
+  $command = ['composer', 'config', 'extra.patchLevel'];
+
+  $process = new Process($command);
+  $process->run();
+
+  if ($process->isSuccessful()) {
+    return new UpdateResult(['Skipped setting composer extra.patchLevel because it is already set.']);
+  }
+  $command[] = '{"drupal/core": "-p2"}';
+  $command[] = '--json';
+
+  $process = new Process($command);
+  $process->mustRun();
+
+  return new UpdateResult(['Set composer extra.patchLevel configuration.']);
+}
