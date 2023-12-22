@@ -126,7 +126,7 @@ function drupal_tools_update_5() : UpdateResult {
   $process->run();
 
   if ($process->isSuccessful()) {
-    return new UpdateResult(['Skipped setting composer extra.patchLevel because it is already set.']);
+    return new UpdateResult(['composer extra.patchLevel is already set. Skipping ...']);
   }
   $command[] = '{"drupal/core": "-p2"}';
   $command[] = '--json';
