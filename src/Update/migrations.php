@@ -116,6 +116,9 @@ function drupal_tools_update_4(UpdateOptions $options, FileManager $fileManager)
   return new UpdateResult(['Attempted to remove migrate-status.php file.']);
 }
 
+/**
+ * Set composer extra.patchLevel.
+ */
 function drupal_tools_update_5() : UpdateResult {
   $command = ['composer', 'config', 'extra.patchLevel'];
 
