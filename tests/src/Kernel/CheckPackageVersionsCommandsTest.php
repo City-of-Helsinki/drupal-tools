@@ -6,7 +6,7 @@ namespace Drupal\Tests\helfi_drupal_tools\Kernel;
 
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\Tests\helfi_api_base\Traits\ApiTestTrait;
-use DrupalTools\Drush\Commands\CheckPackageVersionsCommands;
+use DrupalTools\Drush\Commands\PackageScannerDrushCommands;
 use Drush\Commands\DrushCommands;
 use GuzzleHttp\Psr7\Response;
 use Prophecy\Argument;
@@ -33,7 +33,7 @@ final class CheckPackageVersionsCommandsTest extends KernelTestBase {
    */
   public function testInvalidComposerFile() : void {
     $this->expectException(\RuntimeException::class);
-    CheckPackageVersionsCommands::create($this->container)->checkVersions('nonexistent.lock');
+    PackageScannerDrushCommands::create($this->container)->checkVersions('nonexistent.lock');
   }
 
   /**
@@ -71,7 +71,7 @@ final class CheckPackageVersionsCommandsTest extends KernelTestBase {
       ],
     ])->shouldBeCalledTimes(1);
 
-    $sut = new CheckPackageVersionsCommands(
+    $sut = new PackageScannerDrushCommands(
       $this->container->get('helfi_api_base.package_version_checker'),
       $io->reveal(),
     );

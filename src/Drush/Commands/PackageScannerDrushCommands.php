@@ -10,13 +10,14 @@ use Drupal\helfi_api_base\Package\VersionChecker;
 use Drush\Attributes\Argument;
 use Drush\Attributes\Command;
 use Drush\Commands\DrushCommands;
+use Drush\Drush;
 use Symfony\Component\Console\Style\StyleInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
  * A drush command to check whether given Helfi packages are up-to-date.
  */
-final class CheckPackageVersionsCommands extends DrushCommands {
+final class PackageScannerDrushCommands extends DrushCommands {
 
   /**
    * Constructs a new instance.
@@ -28,9 +29,8 @@ final class CheckPackageVersionsCommands extends DrushCommands {
    */
   public function __construct(
     private readonly VersionChecker $versionChecker,
-    ?StyleInterface $io = NULL,
+    private readonly StyleInterface $style,
   ) {
-    $this->io = $io ?: new SymfonyStyle($this->input(), $this->output());
     parent::__construct();
   }
 
@@ -40,6 +40,7 @@ final class CheckPackageVersionsCommands extends DrushCommands {
   public static function create(ContainerInterface $container): self {
     return new self(
       $container->get('helfi_api_base.package_version_checker'),
+      new SymfonyStyle(Drush::input(),Drush::output())
     );
   }
 
@@ -77,7 +78,7 @@ final class CheckPackageVersionsCommands extends DrushCommands {
       return DrushCommands::EXIT_SUCCESS;
     }
 
-    $this->io->table(
+    $this->style->table(
       ['Name', 'Version', 'Latest version'],
       $versions,
     );
