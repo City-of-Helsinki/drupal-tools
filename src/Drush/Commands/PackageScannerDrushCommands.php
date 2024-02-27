@@ -24,7 +24,7 @@ final class PackageScannerDrushCommands extends DrushCommands {
    *
    * @param \Drupal\helfi_api_base\Package\VersionChecker $versionChecker
    *   The version checker service.
-   * @param \Symfony\Component\Console\Style\StyleInterface $style
+   * @param \Symfony\Component\Console\Style\OutputStyle $style
    *   The output style.
    */
   public function __construct(
