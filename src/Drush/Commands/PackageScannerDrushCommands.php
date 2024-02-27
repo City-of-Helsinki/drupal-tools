@@ -11,6 +11,7 @@ use Drush\Attributes\Argument;
 use Drush\Attributes\Command;
 use Drush\Commands\DrushCommands;
 use Drush\Drush;
+use League\Container\Container;
 use Symfony\Component\Console\Style\StyleInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
@@ -37,10 +38,10 @@ final class PackageScannerDrushCommands extends DrushCommands {
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container): self {
+  public static function create(ContainerInterface $container, Container $drush): self {
     return new self(
       $container->get('helfi_api_base.package_version_checker'),
-      new SymfonyStyle(Drush::input(), Drush::output())
+      new SymfonyStyle($drush->get('input'), $drush->get('output'))
     );
   }
 
