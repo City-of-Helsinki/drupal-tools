@@ -5,11 +5,9 @@
     "license": "GPL-2.0-or-later",
     "minimum-stability": "dev",
     "require": {
-        "drupal/helfi_api_base": "*",
         "drush/drush": "^11 || ^12"
     },
     "require-dev": {
-        "drupal/core-recommended": "^10",
         "dealerdirect/phpcodesniffer-composer-installer": "^0.7.0",
         "drupal/coder": "^8.3",
         "phpspec/prophecy-phpunit": "^2",
@@ -31,31 +29,10 @@
         },
         "files": [ "tests/fixtures/migration_fixture.php" ]
     },
-    "repositories": {
-        "platform": {
-            "type": "composer",
-            "url": "https://repository.drupal.hel.ninja"
-        },
-        "drupal_org": {
-            "type": "composer",
-            "url": "https://packages.drupal.org/8"
-        }
-    },
     "config": {
         "allow-plugins": {
-            "composer/installers": true,
             "dealerdirect/phpcodesniffer-composer-installer": true,
             "phpstan/extension-installer": true
-        },
-        "extra": {
-            "installer-paths": {
-                "sut/core": ["type:drupal-core"],
-                "sut/libraries/{$name}": ["type:drupal-library"],
-                "sut/modules/contrib/{$name}": ["type:drupal-module"],
-                "sut/profiles/contrib/{$name}": ["type:drupal-profile"],
-                "sut/themes/contrib/{$name}": ["type:drupal-theme"],
-                "sut/drush/contrib/{$name}": ["type:drupal-drush"]
-            }
         }
     }
 }
