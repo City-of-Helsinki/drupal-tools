@@ -6,11 +6,12 @@
     "minimum-stability": "dev",
     "require": {
         "drupal/helfi_api_base": "*",
-        "drush/drush": "^11 || ^12"
+        "drush/drush": "^11 || ^12 || ^13"
     },
     "require-dev": {
         "composer/installers": "^2",
         "drupal/core-recommended": "^10.2",
+        "drupal/core-dev": "^10.2",
         "dealerdirect/phpcodesniffer-composer-installer": "^0.7.0",
         "drupal/coder": "^8.3",
         "phpspec/prophecy-phpunit": "^2",
@@ -30,6 +31,10 @@
         "psr-4": {
             "DrupalToolsTest\\": "tests/fixtures"
         },
+        "classmap": [
+            "sut/core",
+            "sut/modules/contrib"
+        ],
         "files": [ "tests/fixtures/migration_fixture.php" ]
     },
     "repositories": {
