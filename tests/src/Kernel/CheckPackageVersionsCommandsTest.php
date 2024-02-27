@@ -8,10 +8,12 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\Tests\helfi_api_base\Traits\ApiTestTrait;
 use DrupalTools\Drush\Commands\PackageScannerDrushCommands;
 use Drush\Commands\DrushCommands;
-use Drush\Drush;
 use GuzzleHttp\Psr7\Response;
+use League\Container\Container;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
+use Symfony\Component\Console\Input\ArgvInput;
+use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Style\OutputStyle;
 
 /**
@@ -32,9 +34,13 @@ final class CheckPackageVersionsCommandsTest extends KernelTestBase {
   /**
    * Tests version check with invalid composer.json file.
    */
-  public function testInvalidComposerFile() : void {
+  public function testInvalidComposerFileException() : void {
+    $container = new Container();
+    $container->add('input', new ArgvInput());
+    $container->add('output', new NullOutput());
+    $sut = PackageScannerDrushCommands::create($this->container, $container);
     $this->expectException(\RuntimeException::class);
-    PackageScannerDrushCommands::create($this->container, Drush::getContainer())->checkVersions('nonexistent.lock');
+    $sut->checkVersions('nonexistent.lock');
   }
 
   /**

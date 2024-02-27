@@ -31,7 +31,6 @@ final class PackageScannerDrushCommands extends DrushCommands {
     private readonly VersionChecker $versionChecker,
     private readonly OutputStyle $style,
   ) {
-    parent::__construct();
   }
 
   /**
