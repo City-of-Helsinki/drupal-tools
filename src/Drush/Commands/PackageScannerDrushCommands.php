@@ -10,9 +10,8 @@ use Drupal\helfi_api_base\Package\VersionChecker;
 use Drush\Attributes\Argument;
 use Drush\Attributes\Command;
 use Drush\Commands\DrushCommands;
-use Drush\Drush;
-use League\Container\Container;
-use Symfony\Component\Console\Style\StyleInterface;
+use Psr\Container\ContainerInterface as DrushContainer;
+use Symfony\Component\Console\Style\OutputStyle;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
@@ -30,7 +29,7 @@ final class PackageScannerDrushCommands extends DrushCommands {
    */
   public function __construct(
     private readonly VersionChecker $versionChecker,
-    private readonly StyleInterface $style,
+    private readonly OutputStyle $style,
   ) {
     parent::__construct();
   }
@@ -38,7 +37,7 @@ final class PackageScannerDrushCommands extends DrushCommands {
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container, Container $drush): self {
+  public static function create(ContainerInterface $container, DrushContainer $drush): self {
     return new self(
       $container->get('helfi_api_base.package_version_checker'),
       new SymfonyStyle($drush->get('input'), $drush->get('output'))

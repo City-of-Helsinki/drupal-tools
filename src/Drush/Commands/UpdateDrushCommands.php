@@ -13,6 +13,9 @@ use Drush\Attributes\Command;
 use Drush\Commands\DrushCommands;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
+use Psr\Container\ContainerInterface;
+use Symfony\Component\Console\Style\OutputStyle;
+use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Path;
 
@@ -24,53 +27,32 @@ final class UpdateDrushCommands extends DrushCommands {
   private const BASE_URL = 'https://raw.githubusercontent.com/City-of-Helsinki/drupal-helfi-platform/main/';
 
   /**
-   * The http client.
-   *
-   * @var \GuzzleHttp\ClientInterface
-   */
-  private readonly ClientInterface $httpClient;
-
-  /**
-   * The filesystem.
-   *
-   * @var \Symfony\Component\Filesystem\Filesystem
-   */
-  private readonly Filesystem $filesystem;
-
-  /**
-   * The update manager.
-   *
-   * @var \DrupalTools\Update\UpdateHookManager
-   */
-  private readonly UpdateHookManager $updateHookManager;
-
-  /**
-   * The file manager.
-   *
-   * @var \DrupalTools\Update\FileManager
-   */
-  private readonly FileManager $fileManager;
-
-  /**
    * Constructs a new instance.
    */
   public function __construct(
-    Filesystem $filesystem = NULL,
-    ClientInterface $httpClient = NULL,
-    FileManager $fileManager = NULL,
-    UpdateHookManager $updateHookManager = NULL,
+    private readonly Filesystem $filesystem,
+    private readonly ClientInterface $httpClient,
+    private readonly FileManager $fileManager,
+    private readonly UpdateHookManager $updateHookManager,
+    private readonly OutputStyle $style,
   ) {
     parent::__construct();
+  }
 
-    $this->filesystem = $filesystem ?: new Filesystem();
-    $this->httpClient = $httpClient ?: new Client(['base_uri' => self::BASE_URL]);
-    $this->fileManager = $fileManager ?: new FileManager(
-      new HttpFileManager($this->httpClient),
-      $this->filesystem,
-    );
-    $this->updateHookManager = $updateHookManager ?: new UpdateHookManager(
-      $this->filesystem,
-      $this->fileManager,
+  /**
+   * {@inheritdoc}
+   */
+  public static function createEarly(ContainerInterface $container) : self {
+    $client = new Client(['base_uri' => self::BASE_URL]);
+    $fileSystem = new Filesystem();
+    $fileManager = new FileManager(new HttpFileManager($client), $fileSystem);
+
+    return new self(
+      new Filesystem(),
+      $client,
+      $fileManager,
+      new UpdateHookManager($fileSystem, $fileManager),
+      new SymfonyStyle($container->get('input'), $container->get('output')),
     );
   }
 
@@ -148,7 +130,7 @@ final class UpdateDrushCommands extends DrushCommands {
     if (!$options->updateExternalPackages) {
       return $this;
     }
-    $this->io()->note('Checking external packages ...');
+    $this->style->note('Checking external packages ...');
 
     // Update druidfi/tools only if the package exists.
     if ($this->filesystem->exists($root . '/tools')) {
@@ -156,7 +138,7 @@ final class UpdateDrushCommands extends DrushCommands {
         'make',
         'self-update',
       ])->run(function (string $type, ?string $output) : void {
-        $this->io()->write($output);
+        $this->style->write($output);
       });
     }
     return $this;
@@ -205,14 +187,14 @@ final class UpdateDrushCommands extends DrushCommands {
    *   The self.
    */
   private function runUpdateHooks(UpdateOptions $options, string $root) : self {
-    $this->io()->note('Running update hooks ...');
+    $this->style->note('Running update hooks ...');
 
     $schemaFile = sprintf('%s/.platform/schema', $root);
     $results = $this->updateHookManager->run($schemaFile, $options);
 
     /** @var \DrupalTools\Update\UpdateResult $result */
     foreach ($results as $result) {
-      $this->io()
+      $this->style
         ->writeln(array_map(fn (mixed $message) => $message,
           $result->messages
         ));
@@ -231,7 +213,7 @@ final class UpdateDrushCommands extends DrushCommands {
    *   The self.
    */
   private function updateDefaultFiles(UpdateOptions $options) : self {
-    $this->io()->note('Checking files ...');
+    $this->style->note('Checking files ...');
     $this->fileManager
       ->updateFiles($options, [
         'public/sites/default/azure.settings.php',
@@ -307,7 +289,7 @@ final class UpdateDrushCommands extends DrushCommands {
     'run-migrations' => TRUE,
   ]) : int {
     if (empty($options['root'])) {
-      $this->io()->error('No root found.');
+      $this->style->error('No root found.');
     }
     $root = $this->gitRoot($options['root']);
     $options = $this->parseOptions($options, $root);
@@ -319,7 +301,7 @@ final class UpdateDrushCommands extends DrushCommands {
     chdir($root);
 
     if ($this->needsUpdate($options)) {
-      $this->io()->note('drupal/helfi_drupal_tools is out of date. Please run "composer update drupal/helfi_drupal_tools" to update it and re-run this command.');
+      $this->style->note('drupal/helfi_drupal_tools is out of date. Please run "composer update drupal/helfi_drupal_tools" to update it and re-run this command.');
 
       return DrushCommands::EXIT_SUCCESS;
     }

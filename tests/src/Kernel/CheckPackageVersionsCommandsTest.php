@@ -8,10 +8,11 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\Tests\helfi_api_base\Traits\ApiTestTrait;
 use DrupalTools\Drush\Commands\PackageScannerDrushCommands;
 use Drush\Commands\DrushCommands;
+use Drush\Drush;
 use GuzzleHttp\Psr7\Response;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
-use Symfony\Component\Console\Style\StyleInterface;
+use Symfony\Component\Console\Style\OutputStyle;
 
 /**
  * Tests Package version checker commands.
@@ -33,7 +34,7 @@ final class CheckPackageVersionsCommandsTest extends KernelTestBase {
    */
   public function testInvalidComposerFile() : void {
     $this->expectException(\RuntimeException::class);
-    PackageScannerDrushCommands::create($this->container)->checkVersions('nonexistent.lock');
+    PackageScannerDrushCommands::create($this->container, Drush::getContainer())->checkVersions('nonexistent.lock');
   }
 
   /**
@@ -62,7 +63,7 @@ final class CheckPackageVersionsCommandsTest extends KernelTestBase {
         ],
       ])),
     ]);
-    $io = $this->prophesize(StyleInterface::class);
+    $io = $this->prophesize(OutputStyle::class);
     $io->table(Argument::any(), [
       [
         'name' => 'drupal/helfi_api_base',
