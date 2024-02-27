@@ -5,7 +5,7 @@
  * Contains mock update hooks for tests.
  */
 
-declare(strict_types = 1);
+declare(strict_types=1);
 
 namespace DrupalToolsTest;
 
