@@ -22,7 +22,7 @@ jobs:
         run: composer install
 
       - name: Run PHPCS
-        run: vendor/bin/phpcs --ignore=*/vendor/* .
+        run: vendor/bin/phpcs --ignore=*/vendor/*,*/sut/* .
 
       - name: Run phpstan
         run: vendor/bin/phpstan analyze -c phpstan.neon .

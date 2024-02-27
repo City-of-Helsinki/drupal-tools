@@ -24,8 +24,8 @@ final class PackageScannerDrushCommands extends DrushCommands {
    *
    * @param \Drupal\helfi_api_base\Package\VersionChecker $versionChecker
    *   The version checker service.
-   * @param \Symfony\Component\Console\Style\StyleInterface|null $io
-   *   The IO.
+   * @param \Symfony\Component\Console\Style\StyleInterface $style
+   *   The output style.
    */
   public function __construct(
     private readonly VersionChecker $versionChecker,
@@ -40,7 +40,7 @@ final class PackageScannerDrushCommands extends DrushCommands {
   public static function create(ContainerInterface $container): self {
     return new self(
       $container->get('helfi_api_base.package_version_checker'),
-      new SymfonyStyle(Drush::input(),Drush::output())
+      new SymfonyStyle(Drush::input(), Drush::output())
     );
   }
 
