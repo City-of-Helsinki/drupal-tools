@@ -1,0 +1,50 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "packages": [
+        {
+            "name": "drupal/helfi_api_base",
+            "version": "1.0.18",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/City-of-Helsinki/drupal-module-helfi-api-base.git",
+                "reference": "e22755ca1b95a9ee142f2edeadc4a1d99a98cb17"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/City-of-Helsinki/drupal-module-helfi-api-base/zipball/e22755ca1b95a9ee142f2edeadc4a1d99a98cb17",
+                "reference": "e22755ca1b95a9ee142f2edeadc4a1d99a98cb17",
+                "shasum": ""
+            },
+            "require": {
+                "drupal/api_tools": "~1.0.0"
+            },
+            "require-dev": {
+                "dealerdirect/phpcodesniffer-composer-installer": "^0.7.0",
+                "drupal/coder": "^8.3"
+            },
+            "type": "drupal-custom-module",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "description": "Helfi - API Base",
+            "support": {
+                "source": "https://github.com/City-of-Helsinki/drupal-module-helfi-api-base/tree/1.0.18",
+                "issues": "https://github.com/City-of-Helsinki/drupal-module-helfi-api-base/issues"
+            },
+            "time": "2021-04-29T07:34:21+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": [],
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": [],
+    "platform-dev": [],
+    "plugin-api-version": "2.6.0"
+}
