@@ -44,12 +44,24 @@ final class UpdateDrushCommands extends DrushCommands {
    * Constructs a new instance.
    */
   public function __construct(
-    private readonly Filesystem $filesystem,
-    private readonly ClientInterface $httpClient,
-    private readonly FileManager $fileManager,
-    private readonly UpdateHookManager $updateHookManager,
-    private readonly OutputStyle $style,
+    private ?Filesystem $filesystem = NULL,
+    private ?ClientInterface $httpClient = NULL,
+    private ?FileManager $fileManager = NULL,
+    private ?UpdateHookManager $updateHookManager = NULL,
+    private ?OutputStyle $style = NULL,
   ) {
+    if (!$this->filesystem) {
+      $this->filesystem = new Filesystem();
+    }
+    if (!$this->httpClient) {
+      $this->httpClient = new Client(['base_uri' => self::BASE_URL]);
+    }
+    if (!$this->fileManager) {
+      $this->fileManager = new FileManager(new HttpFileManager($this->httpClient), $this->filesystem);
+    }
+    if (!$this->style) {
+      $this->style = new SymfonyStyle($this->input(), $this->output());
+    }
     parent::__construct();
   }
 
