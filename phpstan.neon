@@ -4,6 +4,7 @@ parameters:
   paths:
     - ./
   excludePaths:
+    - sut
     - vendor
     - src/Drush/Commands/HelperDrushCommands.php
     - src/Drush/Commands/OpenShiftDrushCommands.php

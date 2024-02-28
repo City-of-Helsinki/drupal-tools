@@ -13,6 +13,17 @@ jobs:
     container:
       image: ghcr.io/city-of-helsinki/drupal-php-docker:${{ matrix.php-versions }}-alpine
 
+    services:
+      db:
+        image: mysql:8
+        env:
+          MYSQL_USER: drupal
+          MYSQL_PASSWORD: drupal
+          MYSQL_DATABASE: drupal
+          MYSQL_ROOT_PASSWORD: drupal
+        ports:
+          - 3306:3306
+
     steps:
       - uses: actions/checkout@v3
         with:
@@ -22,7 +33,7 @@ jobs:
         run: composer install
 
       - name: Run PHPCS
-        run: vendor/bin/phpcs --ignore=*/vendor/* .
+        run: vendor/bin/phpcs --ignore=*/vendor/*,*/sut/* .
 
       - name: Run phpstan
         run: vendor/bin/phpstan analyze -c phpstan.neon .
