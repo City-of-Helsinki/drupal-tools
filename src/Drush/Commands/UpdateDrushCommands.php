@@ -11,6 +11,7 @@ use DrupalTools\Update\UpdateHookManager;
 use DrupalTools\Update\UpdateOptions;
 use Drush\Attributes\Command;
 use Drush\Commands\DrushCommands;
+use Drush\Drush;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use Psr\Container\ContainerInterface;
@@ -44,12 +45,29 @@ final class UpdateDrushCommands extends DrushCommands {
    * Constructs a new instance.
    */
   public function __construct(
-    private readonly Filesystem $filesystem,
-    private readonly ClientInterface $httpClient,
-    private readonly FileManager $fileManager,
-    private readonly UpdateHookManager $updateHookManager,
-    private readonly OutputStyle $style,
+    private ?Filesystem $filesystem = NULL,
+    private ?ClientInterface $httpClient = NULL,
+    private ?FileManager $fileManager = NULL,
+    private ?UpdateHookManager $updateHookManager = NULL,
+    private ?OutputStyle $style = NULL,
   ) {
+    // @todo createEarly() method was added in Drush 12.
+    // Remove these once we drop support for Drush 11.
+    if (!$this->filesystem) {
+      $this->filesystem = new Filesystem();
+    }
+    if (!$this->httpClient) {
+      $this->httpClient = new Client(['base_uri' => self::BASE_URL]);
+    }
+    if (!$this->fileManager) {
+      $this->fileManager = new FileManager(new HttpFileManager($this->httpClient), $this->filesystem);
+    }
+    if (!$this->updateHookManager) {
+      $this->updateHookManager = new UpdateHookManager($this->filesystem, $this->fileManager);
+    }
+    if (!$this->style) {
+      $this->style = new SymfonyStyle(Drush::input(), Drush::output());
+    }
     parent::__construct();
   }
 
@@ -62,7 +80,7 @@ final class UpdateDrushCommands extends DrushCommands {
     $fileManager = new FileManager(new HttpFileManager($client), $fileSystem);
 
     return new self(
-      new Filesystem(),
+      $fileSystem,
       $client,
       $fileManager,
       new UpdateHookManager($fileSystem, $fileManager),
