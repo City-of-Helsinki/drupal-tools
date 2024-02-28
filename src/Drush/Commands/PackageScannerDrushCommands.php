@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace DrupalTools\Drush\Commands;
 
 use ComposerLockParser\ComposerInfo;
+use Consolidation\AnnotatedCommand\CommandResult;
+use Consolidation\OutputFormatters\StructuredData\RowsOfFields;
 use Drupal\Component\DependencyInjection\ContainerInterface;
 use Drupal\helfi_api_base\Package\VersionChecker;
 use Drush\Attributes\Argument;
 use Drush\Attributes\Command;
+use Drush\Attributes\FieldLabels;
 use Drush\Commands\DrushCommands;
-use Psr\Container\ContainerInterface as DrushContainer;
-use Symfony\Component\Console\Style\OutputStyle;
-use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
  * A drush command to check whether given Helfi packages are up-to-date.
@@ -24,22 +24,18 @@ final class PackageScannerDrushCommands extends DrushCommands {
    *
    * @param \Drupal\helfi_api_base\Package\VersionChecker $versionChecker
    *   The version checker service.
-   * @param \Symfony\Component\Console\Style\OutputStyle $style
-   *   The output style.
    */
   public function __construct(
     private readonly VersionChecker $versionChecker,
-    private readonly OutputStyle $style,
   ) {
   }
 
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container, DrushContainer $drush): self {
+  public static function create(ContainerInterface $container): self {
     return new self(
       $container->get('helfi_api_base.package_version_checker'),
-      new SymfonyStyle($drush->get('input'), $drush->get('output'))
     );
   }
 
@@ -48,16 +44,23 @@ final class PackageScannerDrushCommands extends DrushCommands {
    *
    * @param string $file
    *   The path to composer.lock file.
+   * @param array $options
+   *   The options.
    *
-   * @return int
-   *   The exit code.
+   * @return \Consolidation\AnnotatedCommand\CommandResult
+   *   The result.
    */
   #[Command(name: 'helfi:tools:check-composer-versions')]
   #[Argument(name: 'file', description: 'Path to composer.lock file')]
-  public function checkVersions(string $file) : int {
+  #[FieldLabels(labels: [
+    'name' => 'Name',
+    'version' => 'Current version',
+    'latest' => 'Latest version',
+  ])]
+  public function checkVersions(string $file, array $options = ['format' => 'table']) : CommandResult {
     $info = new ComposerInfo($file);
 
-    $versions = [];
+    $rows = [];
     /** @var \Composer\Package\Package $package */
     foreach (iterator_to_array($info->getPackages()) as $package) {
       $version = $this->versionChecker->get($package->getName(), $package->getVersion());
@@ -67,21 +70,16 @@ final class PackageScannerDrushCommands extends DrushCommands {
       if (!$version || $version->isLatest || str_starts_with($package->getVersion(), 'dev-')) {
         continue;
       }
-      $versions[] = [
+      $rows[] = [
         'name' => $package->getName(),
-        'currentVersion' => $package->getVersion(),
-        'latestVersion' => $version->latestVersion,
+        'version' => $package->getVersion(),
+        'latest' => $version->latestVersion,
       ];
     }
-    if (!$versions) {
-      return DrushCommands::EXIT_SUCCESS;
-    }
 
-    $this->style->table(
-      ['Name', 'Version', 'Latest version'],
-      $versions,
-    );
-    return DrushCommands::EXIT_FAILURE_WITH_CLARITY;
+    $exitCode = $rows ? DrushCommands::EXIT_FAILURE_WITH_CLARITY : DrushCommands::EXIT_SUCCESS;
+
+    return CommandResult::dataWithExitCode(new RowsOfFields($rows), $exitCode);
   }
 
 }
