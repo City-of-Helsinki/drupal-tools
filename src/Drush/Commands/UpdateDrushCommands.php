@@ -20,11 +20,25 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Filesystem\Path;
 
 /**
- * A Drush commandfile.
+ * A Drush command to update platform files from upstream.
  */
 final class UpdateDrushCommands extends DrushCommands {
 
   private const BASE_URL = 'https://raw.githubusercontent.com/City-of-Helsinki/drupal-helfi-platform/main/';
+
+  /**
+   * The git root.
+   *
+   * @var string
+   */
+  private ?string $gitRoot = NULL;
+
+  public const DEFAULT_OPTIONS = [
+    'ignore-files' => TRUE,
+    'update-external-packages' => TRUE,
+    'self-update' => TRUE,
+    'run-migrations' => TRUE,
+  ];
 
   /**
    * Constructs a new instance.
@@ -63,16 +77,14 @@ final class UpdateDrushCommands extends DrushCommands {
    *   The git root.
    */
   private function gitRoot(string $root) : string {
-    static $gitRoot = NULL;
+    if (!$this->gitRoot) {
+      $this->gitRoot = Path::canonicalize(sprintf('%s/../', rtrim($root, '/')));
 
-    if (!$gitRoot) {
-      $gitRoot = Path::canonicalize(sprintf('%s/../', rtrim($root, '/')));
-
-      if (!$this->filesystem->exists($gitRoot . '/.git')) {
+      if (!$this->filesystem->exists($this->gitRoot . '/.git')) {
         throw new \InvalidArgumentException('Failed to parse GIT root.');
       }
     }
-    return $gitRoot;
+    return $this->gitRoot;
   }
 
   /**
@@ -157,16 +169,12 @@ final class UpdateDrushCommands extends DrushCommands {
     if (!$options->selfUpdate) {
       return FALSE;
     }
-    static $latestCommit = NULL;
+    $body = $this->httpClient
+      ->request('GET', 'https://api.github.com/repos/city-of-helsinki/drupal-tools/commits/main')
+      ->getBody()
+      ->getContents();
 
-    if (!$latestCommit) {
-      $body = $this->httpClient
-        ->request('GET', 'https://api.github.com/repos/city-of-helsinki/drupal-tools/commits/main')
-        ->getBody()
-        ->getContents();
-
-      $latestCommit = $body ? json_decode($body)?->sha : '';
-    }
+    $latestCommit = $body ? json_decode($body)?->sha : '';
     $selfVersion = InstalledVersions::getReference('drupal/helfi_drupal_tools');
 
     if (!$latestCommit || !$selfVersion) {
@@ -282,14 +290,10 @@ final class UpdateDrushCommands extends DrushCommands {
    *   The exit code.
    */
   #[Command(name: 'helfi:tools:update-platform')]
-  public function updatePlatform(array $options = [
-    'ignore-files' => TRUE,
-    'update-external-packages' => TRUE,
-    'self-update' => TRUE,
-    'run-migrations' => TRUE,
-  ]) : int {
+  public function updatePlatform(array $options = self::DEFAULT_OPTIONS) : int {
     if (empty($options['root'])) {
-      $this->style->error('No root found.');
+      $this->style->error('No root provided');
+      return DrushCommands::EXIT_FAILURE;
     }
     $root = $this->gitRoot($options['root']);
     $options = $this->parseOptions($options, $root);
@@ -301,9 +305,9 @@ final class UpdateDrushCommands extends DrushCommands {
     chdir($root);
 
     if ($this->needsUpdate($options)) {
-      $this->style->note('drupal/helfi_drupal_tools is out of date. Please run "composer update drupal/helfi_drupal_tools" to update it and re-run this command.');
+      $this->style->error('drupal/helfi_drupal_tools is out of date. Please run "composer update drupal/helfi_drupal_tools" to update it and re-run this command.');
 
-      return DrushCommands::EXIT_SUCCESS;
+      return DrushCommands::EXIT_FAILURE_WITH_CLARITY;
     }
     $this->updateExternalPackages($options, $root)
       ->runUpdateHooks($options, $root)
