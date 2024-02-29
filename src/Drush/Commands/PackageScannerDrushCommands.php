@@ -9,10 +9,12 @@ use Consolidation\AnnotatedCommand\CommandResult;
 use Consolidation\OutputFormatters\StructuredData\RowsOfFields;
 use Drupal\Component\DependencyInjection\ContainerInterface;
 use Drupal\helfi_api_base\Package\VersionChecker;
+use DrupalTools\OutputFormatters\MarkdownTableFormatter;
 use Drush\Attributes\Argument;
 use Drush\Attributes\Command;
 use Drush\Attributes\FieldLabels;
 use Drush\Commands\DrushCommands;
+use Psr\Container\ContainerInterface as DrushContainer;
 
 /**
  * A drush command to check whether given Helfi packages are up-to-date.
@@ -33,7 +35,14 @@ final class PackageScannerDrushCommands extends DrushCommands {
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container): self {
+  public static function create(ContainerInterface $container, DrushContainer $drush): self {
+    /** @var \Drush\Formatters\DrushFormatterManager $formatterManager */
+    $formatterManager = $drush->get('formatterManager');
+
+    // @todo Figure out if there's a better way to inject this service.
+    if (!$formatterManager->hasFormatter('markdown_table')) {
+      $formatterManager->addFormatter('markdown_table', new MarkdownTableFormatter());
+    }
     return new self(
       $container->get('helfi_api_base.package_version_checker'),
     );
