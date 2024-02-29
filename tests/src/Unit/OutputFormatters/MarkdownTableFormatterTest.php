@@ -69,6 +69,15 @@ class MarkdownTableFormatterTest extends TestCase {
         'latest' => 'Latest',
       ],
     ]);
+
+    $data = new RowsOfFields([]);
+    $data = $data->restructure($options);
+    $formatter->write($output, $data, $options);
+
+    $expected = "Name | Version | Latest\n";
+    $expected .= "-- | -- | --\n";
+    $this->assertEquals($expected, $output->fetch());
+
     $data = new RowsOfFields([
       [
         'name' => 'Test',
