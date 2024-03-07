@@ -14,6 +14,7 @@ use Drush\Attributes\Argument;
 use Drush\Attributes\Command;
 use Drush\Attributes\FieldLabels;
 use Drush\Commands\DrushCommands;
+use Drush\Drush;
 use Psr\Container\ContainerInterface as DrushContainer;
 
 /**
@@ -35,7 +36,10 @@ final class PackageScannerDrushCommands extends DrushCommands {
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container, DrushContainer $drush): self {
+  public static function create(ContainerInterface $container, DrushContainer $drush = NULL): self {
+    if (!$drush && Drush::hasContainer()) {
+      $drush = Drush::getContainer();
+    }
     /** @var \Drush\Formatters\DrushFormatterManager $formatterManager */
     $formatterManager = $drush->get('formatterManager');
 
