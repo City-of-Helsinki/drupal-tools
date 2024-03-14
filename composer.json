@@ -21,6 +21,7 @@
         "jangregor/phpstan-prophecy": "^1.0",
         "phpunit/phpunit": "^9.6"
     },
+    "prefer-stable": true,
     "autoload": {
         "psr-4": {
             "DrupalTools\\": "src"
@@ -51,7 +52,8 @@
         "allow-plugins": {
             "composer/installers": true,
             "dealerdirect/phpcodesniffer-composer-installer": true,
-            "phpstan/extension-installer": true
+            "phpstan/extension-installer": true,
+            "php-http/discovery": false
         }
     },
     "extra": {
