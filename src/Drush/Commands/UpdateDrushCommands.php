@@ -258,7 +258,7 @@ final class UpdateDrushCommands extends DrushCommands {
         'docker/openshift/crons/pubsub.sh',
         'docker/openshift/preflight/preflight.php',
         'docker/openshift/notify.php',
-        'docker-compose.yml',
+        'compose.yaml',
         'phpunit.xml.dist',
         'phpunit.platform.xml',
         'tools/make/project/install.mk',

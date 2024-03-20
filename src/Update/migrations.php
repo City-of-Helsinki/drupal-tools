@@ -136,3 +136,13 @@ function drupal_tools_update_5() : UpdateResult {
 
   return new UpdateResult(['Set composer extra.patchLevel configuration.']);
 }
+
+/**
+ * Remove leftover docker-compose.yml file.
+ */
+function drupal_tools_update_6(UpdateOptions $options, FileManager $fileManager) : UpdateResult {
+  $fileManager->removeFiles($options, [
+    'docker-compose.yml',
+  ]);
+  return new UpdateResult(['Attempted to remove docker-compose.yml file.']);
+}
