@@ -187,6 +187,11 @@ final class UpdateDrushCommands extends DrushCommands {
     if (!$options->selfUpdate) {
       return FALSE;
     }
+
+    // Skip self-update check if we're using a custom branch.
+    if (InstalledVersions::getVersion('drupal/helfi_drupal_tools') !== 'dev-main') {
+      return FALSE;
+    }
     $body = $this->httpClient
       ->request('GET', 'https://api.github.com/repos/city-of-helsinki/drupal-tools/commits/main')
       ->getBody()
