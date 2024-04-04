@@ -20,15 +20,12 @@ final class UpdateOptions {
    *   Whether to check if package needs to be updated.
    * @param bool $runMigrations
    *   Whether to run migrations.
-   * @param bool $isCI
-   *   Whether we're operating in a CI environment.
    */
   public function __construct(
     public array $ignoreFiles = [],
     public bool $updateExternalPackages = TRUE,
     public bool $selfUpdate = TRUE,
     public bool $runMigrations = TRUE,
-    public bool $isCI = FALSE,
   ) {
   }
 

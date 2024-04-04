@@ -317,9 +317,6 @@ final class UpdateDrushCommands extends DrushCommands {
     $root = $this->gitRoot($options['root']);
     $options = $this->parseOptions($options, $root);
 
-    if (getenv('CI')) {
-      $options->isCI = TRUE;
-    }
     // Make sure all operations are relative to Git root.
     chdir($root);
 
