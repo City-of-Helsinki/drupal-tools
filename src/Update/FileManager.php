@@ -27,21 +27,6 @@ class FileManager {
   }
 
   /**
-   * Checks if the given file should be ignored.
-   *
-   * @param string $file
-   *   The file to check.
-   * @param array $ignoredFiles
-   *   The files to ignore.
-   *
-   * @return bool
-   *   TRUE if the file should be ignored.
-   */
-  private function ignoreFile(string $file, array $ignoredFiles) : bool {
-    return in_array($file, $ignoredFiles);
-  }
-
-  /**
    * Checks if file can be updated.
    *
    * @param string $file
@@ -58,6 +43,21 @@ class FileManager {
       return !str_starts_with($file, '.github/workflows');
     }
     return TRUE;
+  }
+
+  /**
+   * Checks if the given file should be ignored.
+   *
+   * @param string $file
+   *   The file to check.
+   * @param array $ignoredFiles
+   *   The files to ignore.
+   *
+   * @return bool
+   *   TRUE if the file should be ignored.
+   */
+  private function ignoreFile(string $file, array $ignoredFiles) : bool {
+    return in_array($file, $ignoredFiles);
   }
 
   /**
