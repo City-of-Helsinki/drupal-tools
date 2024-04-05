@@ -38,8 +38,8 @@ class FileManager {
    *   TRUE if file can be updated automatically.
    */
   private function fileCanBeUpdated(string $file, UpdateOptions $options) : bool {
-    if ($options->hasWorkFlowAccess) {
-      // Workflows cannot be updated without PAT with 'workflow' access.
+    if (!$options->hasWorkFlowAccess) {
+      // Workflow files cannot be updated without PAT with 'workflow' access.
       return !str_starts_with($file, '.github/workflows');
     }
     return TRUE;

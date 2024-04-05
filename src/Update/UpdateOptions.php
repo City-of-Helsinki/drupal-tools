@@ -28,7 +28,7 @@ final class UpdateOptions {
     public bool $updateExternalPackages = TRUE,
     public bool $selfUpdate = TRUE,
     public bool $runMigrations = TRUE,
-    public bool $hasWorkFlowAccess = FALSE,
+    public bool $hasWorkFlowAccess = TRUE,
   ) {
   }
 
