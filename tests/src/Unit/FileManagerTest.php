@@ -105,21 +105,6 @@ class FileManagerTest extends TestCase {
   }
 
   /**
-   * Make sure we skip files that cannot be updated.
-   */
-  public function testUpdateFilesCannotBeUpdated() : void {
-    $client = $this->prophesize(HttpFileManager::class);
-    $client->copyFile()
-      ->shouldNotBeCalled();
-    $filesystem = $this->prophesize(Filesystem::class);
-    $options = new UpdateOptions(hasWorkFlowAccess: FALSE);
-    $sut = new FileManager($client->reveal(), $filesystem->reveal());
-    $sut->updateFiles($options, [
-      '.github/workflows/test.yml' => '.github/workflows/test.yml',
-    ]);
-  }
-
-  /**
    * Tests ignoreFiles option with addFiles().
    *
    * @dataProvider addFilesIgnoreFilesData

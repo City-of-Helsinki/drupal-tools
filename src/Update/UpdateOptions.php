@@ -20,15 +20,12 @@ final class UpdateOptions {
    *   Whether to check if package needs to be updated.
    * @param bool $runMigrations
    *   Whether to run migrations.
-   * @param bool $hasWorkFlowAccess
-   *   Whether the runner has access to update GitHub workflow files.
    */
   public function __construct(
     public array $ignoreFiles = [],
     public bool $updateExternalPackages = TRUE,
     public bool $selfUpdate = TRUE,
     public bool $runMigrations = TRUE,
-    public bool $hasWorkFlowAccess = TRUE,
   ) {
   }
 

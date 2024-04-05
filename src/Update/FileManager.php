@@ -27,25 +27,6 @@ class FileManager {
   }
 
   /**
-   * Checks if file can be updated.
-   *
-   * @param string $file
-   *   The file.
-   * @param \DrupalTools\Update\UpdateOptions $options
-   *   The update options.
-   *
-   * @return bool
-   *   TRUE if file can be updated automatically.
-   */
-  private function fileCanBeUpdated(string $file, UpdateOptions $options) : bool {
-    if (!$options->hasWorkFlowAccess) {
-      // Workflow files cannot be updated without PAT with 'workflow' access.
-      return !str_starts_with($file, '.github/workflows');
-    }
-    return TRUE;
-  }
-
-  /**
    * Checks if the given file should be ignored.
    *
    * @param string $file
@@ -83,13 +64,6 @@ class FileManager {
 
       // Allow files to be ignored.
       if ($this->ignoreFile($source, $options->ignoreFiles)) {
-        continue;
-      }
-
-      // Check if we can update given file. For example, we can't
-      // update GitHub workflow files in GitHub automation without Personal
-      // Access Token with 'workflow' access.
-      if (!$this->fileCanBeUpdated($source, $options)) {
         continue;
       }
 

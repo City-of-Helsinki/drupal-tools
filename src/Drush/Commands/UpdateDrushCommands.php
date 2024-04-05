@@ -322,11 +322,6 @@ final class UpdateDrushCommands extends DrushCommands {
     $root = $this->gitRoot($options['root']);
     $options = $this->parseOptions($options, $root);
 
-    // Update GitHub workflow files in CI only if WEBHOOK_TOKEN environment
-    // variable is present.
-    if (getenv('CI') && !getenv('WEBHOOK_TOKEN')) {
-      $options->hasWorkFlowAccess = FALSE;
-    }
     // Make sure all operations are relative to Git root.
     chdir($root);
 
