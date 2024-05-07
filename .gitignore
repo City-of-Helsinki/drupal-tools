@@ -6,3 +6,4 @@ tests/fixtures/schema
 tests/coverage.xml
 sut/core
 sut/modules
+.idea
