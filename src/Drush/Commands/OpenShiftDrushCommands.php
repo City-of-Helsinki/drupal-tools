@@ -115,7 +115,7 @@ final class OpenShiftDrushCommands extends DrushCommands {
   private function invokeOc(
     array $command,
     ?callable $callback = NULL,
-    bool $showOutput = TRUE
+    bool $showOutput = TRUE,
   ) : int {
     $this
       ->ensureEnvVariables()
