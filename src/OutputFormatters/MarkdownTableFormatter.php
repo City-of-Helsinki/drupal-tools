@@ -33,7 +33,7 @@ final class MarkdownTableFormatter implements FormatterInterface, ValidDataTypes
   public function write(
     OutputInterface $output,
     $data,
-    FormatterOptions $options
+    FormatterOptions $options,
   ) : void {
     assert($data instanceof TableTransformation);
     $headers = $data->getHeaders();
