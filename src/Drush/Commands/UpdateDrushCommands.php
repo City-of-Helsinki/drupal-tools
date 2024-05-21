@@ -244,6 +244,8 @@ final class UpdateDrushCommands extends DrushCommands {
       ->updateFiles($options, [
         'public/sites/default/azure.settings.php',
         'public/sites/default/settings.php',
+        'docker/elastic-proxy/elastic.conf',
+        'docker/elastic-proxy/nginx.conf',
         'docker/openshift/custom.locations',
         'docker/openshift/init.sh',
         'docker/openshift/Dockerfile',
