@@ -146,3 +146,24 @@ function drupal_tools_update_6(UpdateOptions $options, FileManager $fileManager)
   ]);
   return new UpdateResult(['Attempted to remove docker-compose.yml file.']);
 }
+
+/**
+ * Update composer/composer.
+ */
+function drupal_tools_update_7() : UpdateResult {
+  $command = ['composer', 'show', 'composer/composer'];
+
+  $process = new Process($command);
+  $process->run();
+
+  if (!$process->isSuccessful()) {
+    return new UpdateResult(['composer/composer is not installed. Skipping ...']);
+  }
+
+  $command = ['composer', 'update', 'composer/composer:2.7.7', '-W'];
+
+  $process = new Process($command);
+  $process->mustRun();
+
+  return new UpdateResult(['Updated composer/composer.']);
+}
