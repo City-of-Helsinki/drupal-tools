@@ -258,6 +258,8 @@ final class UpdateDrushCommands extends DrushCommands {
         'docker/openshift/crons/purge-queue.sh',
         'docker/openshift/crons/update-translations.sh',
         'docker/openshift/crons/pubsub.sh',
+        'docker/openshift/crons/cron.sh',
+        'docker/openshift/cron-entrypoint.sh',
         'docker/openshift/preflight/preflight.php',
         'docker/openshift/notify.php',
         'compose.yaml',
@@ -293,7 +295,6 @@ final class UpdateDrushCommands extends DrushCommands {
    */
   private function addDefaultFiles(UpdateOptions $options) : self {
     $this->fileManager->addFiles($options, [
-      'docker/openshift/crons/base.sh' => ['remote' => TRUE],
       'public/sites/default/all.settings.php' => ['remote' => TRUE],
       'phpstan.neon' => ['remote' => TRUE],
     ]);
