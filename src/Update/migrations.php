@@ -167,3 +167,26 @@ function drupal_tools_update_7() : UpdateResult {
 
   return new UpdateResult(['Updated composer/composer.']);
 }
+
+/**
+ * Remove dependency to drupal/stage_file_proxy if platform config is installed.
+ *
+ * Stage file is installed as helfi_platform_config dependency.
+ */
+function drupal_tools_update_8() : UpdateResult {
+  $command = ['composer', 'show', 'drupal/helfi_platform_config'];
+
+  $process = new Process($command);
+  $process->run();
+
+  if (!$process->isSuccessful()) {
+    return new UpdateResult(['drupal/helfi_platform_config is not installed. Skipping ...']);
+  }
+
+  $command = ['composer', 'remove', 'drupal/stage_file_proxy'];
+
+  $process = new Process($command);
+  $process->run();
+
+  return new UpdateResult(['Removed drupal/stage_file_proxy.']);
+}
