@@ -169,7 +169,7 @@ function drupal_tools_update_7() : UpdateResult {
 }
 
 /**
- * Remove direct dependency to drupal/stage_file_proxy if helfi_platform_config is installed.
+ * Remove dependency to drupal/stage_file_proxy.
  */
 function drupal_tools_update_8() : UpdateResult {
   $command = ['composer', 'show', 'drupal/helfi_platform_config'];
