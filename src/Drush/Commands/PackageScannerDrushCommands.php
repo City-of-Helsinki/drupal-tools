@@ -36,7 +36,7 @@ final class PackageScannerDrushCommands extends DrushCommands {
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container, DrushContainer $drush = NULL): self {
+  public static function create(ContainerInterface $container, ?DrushContainer $drush = NULL): self {
     if (!$drush && Drush::hasContainer()) {
       $drush = Drush::getContainer();
     }
