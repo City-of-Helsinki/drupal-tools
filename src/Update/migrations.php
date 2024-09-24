@@ -190,3 +190,20 @@ function drupal_tools_update_8() : UpdateResult {
 
   return new UpdateResult(['Removed drupal/stage_file_proxy.']);
 }
+
+function drupal_tools_update_9() : UpdateResult {
+    $command = ['composer', 'config', 'audit.ignore'];
+
+    $process = new Process($command);
+    $process->run();
+
+    if ($process->isSuccessful()) {
+        return new UpdateResult(['composer audit.ignore is already set. Skipping ...']);
+    }
+    $command[] = 'GHSA-mg8j-w93w-xjgc';
+
+    $process = new Process($command);
+    $process->mustRun();
+
+    return new UpdateResult(['Set composer audit.ignore configuration.']);
+}
