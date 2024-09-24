@@ -51,7 +51,7 @@ final class OpenShiftDrushCommands extends DrushCommands {
   /**
    * Ensure that we're logged in.
    */
-  private function ensureLoginDetails(string $token = NULL) : self {
+  private function ensureLoginDetails(?string $token = NULL) : self {
     static $attemptedLogin;
 
     if ($attemptedLogin) {
