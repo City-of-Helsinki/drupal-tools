@@ -191,10 +191,15 @@ function drupal_tools_update_8() : UpdateResult {
   return new UpdateResult(['Removed drupal/stage_file_proxy.']);
 }
 
+/**
+ * Ignore https://github.com/advisories/GHSA-mg8j-w93w-xjgc.
+ *
+ * This does not affect us.
+ */
 function drupal_tools_update_9() : UpdateResult {
-    $command = ['composer', 'config', 'audit.ignore', 'GHSA-mg8j-w93w-xjgc'];
-    $process = new Process($command);
-    $process->mustRun();
+  $command = ['composer', 'config', 'audit.ignore', 'GHSA-mg8j-w93w-xjgc'];
+  $process = new Process($command);
+  $process->mustRun();
 
-    return new UpdateResult(['Set composer audit.ignore configuration.']);
+  return new UpdateResult(['Set composer audit.ignore configuration.']);
 }
