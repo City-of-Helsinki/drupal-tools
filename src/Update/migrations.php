@@ -192,16 +192,7 @@ function drupal_tools_update_8() : UpdateResult {
 }
 
 function drupal_tools_update_9() : UpdateResult {
-    $command = ['composer', 'config', 'audit.ignore'];
-
-    $process = new Process($command);
-    $process->run();
-
-    if ($process->isSuccessful()) {
-        return new UpdateResult(['composer audit.ignore is already set. Skipping ...']);
-    }
-    $command[] = 'GHSA-mg8j-w93w-xjgc';
-
+    $command = ['composer', 'config', 'audit.ignore', 'GHSA-mg8j-w93w-xjgc'];
     $process = new Process($command);
     $process->mustRun();
 
