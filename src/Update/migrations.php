@@ -212,5 +212,7 @@ function drupal_tools_update_9() : UpdateResult {
 function drupal_tools_update_10() : UpdateResult {
   (new Process(['composer', 'remove', 'drupal/raven']))
     ->run();
-  return new UpdateResult(['Removed direct drupal/raven dependency.']);
+  (new Process(['composer', 'update', 'drupal/raven', '-W']))
+    ->run();
+  return new UpdateResult(['Updated Raven module to latest version.']);
 }
