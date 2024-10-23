@@ -278,7 +278,6 @@ final class UpdateDrushCommands extends DrushCommands {
         '.github/workflows/test.yml.dist' => '.github/workflows/test.yml',
         '.github/workflows/artifact.yml.dist' => '.github/workflows/artifact.yml',
         '.github/workflows/update-config.yml.dist' => '.github/workflows/update-config.yml',
-        '.gitignore.dist' => '.gitignore',
         '.github/workflows/auto-release-pr.yml.dist' => '.github/workflows/auto-release-pr.yml',
       ]);
     return $this;
