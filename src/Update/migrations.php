@@ -203,3 +203,16 @@ function drupal_tools_update_9() : UpdateResult {
 
   return new UpdateResult(['Set composer audit.ignore configuration.']);
 }
+
+/**
+ * Remove direct dependency to drupal/raven module.
+ *
+ * Raven module is installed as helfi_api_base dependency.
+ */
+function drupal_tools_update_10() : UpdateResult {
+  (new Process(['composer', 'remove', 'drupal/raven']))
+    ->run();
+  (new Process(['composer', 'update', 'drupal/raven', '-W']))
+    ->run();
+  return new UpdateResult(['Updated Raven module to latest version.']);
+}
