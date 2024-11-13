@@ -10,6 +10,6 @@ parameters:
     - src/Drush/Commands/OpenShiftDrushCommands.php
   level: 6
   treatPhpDocTypesAsCertain: false
-	ignoreErrors:
-		-
-			identifier: missingType.iterableValue
+  ignoreErrors:
+    -
+      identifier: missingType.iterableValue
