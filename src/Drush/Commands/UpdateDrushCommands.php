@@ -9,9 +9,10 @@ use DrupalTools\HttpFileManager;
 use DrupalTools\Update\FileManager;
 use DrupalTools\Update\UpdateHookManager;
 use DrupalTools\Update\UpdateOptions;
+use Drush\Attributes\Bootstrap;
 use Drush\Attributes\Command;
+use Drush\Boot\DrupalBootLevels;
 use Drush\Commands\DrushCommands;
-use Drush\Drush;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use Psr\Container\ContainerInterface;
@@ -23,6 +24,7 @@ use Symfony\Component\Filesystem\Path;
 /**
  * A Drush command to update platform files from upstream.
  */
+#[Bootstrap(DrupalBootLevels::NONE)]
 final class UpdateDrushCommands extends DrushCommands {
 
   private const BASE_URL = 'https://raw.githubusercontent.com/City-of-Helsinki/drupal-helfi-platform/main/';
@@ -30,7 +32,7 @@ final class UpdateDrushCommands extends DrushCommands {
   /**
    * The git root.
    *
-   * @var string
+   * @var null|string
    */
   private ?string $gitRoot = NULL;
 
@@ -45,36 +47,19 @@ final class UpdateDrushCommands extends DrushCommands {
    * Constructs a new instance.
    */
   public function __construct(
-    private ?Filesystem $filesystem = NULL,
-    private ?ClientInterface $httpClient = NULL,
-    private ?FileManager $fileManager = NULL,
-    private ?UpdateHookManager $updateHookManager = NULL,
-    private ?OutputStyle $style = NULL,
+    private readonly Filesystem $filesystem,
+    private readonly ClientInterface $httpClient,
+    private readonly FileManager $fileManager,
+    private readonly UpdateHookManager $updateHookManager,
+    private readonly OutputStyle $style,
   ) {
-    // @todo createEarly() method was added in Drush 12.
-    // Remove these once we drop support for Drush 11.
-    if (!$this->filesystem) {
-      $this->filesystem = new Filesystem();
-    }
-    if (!$this->httpClient) {
-      $this->httpClient = new Client(['base_uri' => self::BASE_URL]);
-    }
-    if (!$this->fileManager) {
-      $this->fileManager = new FileManager(new HttpFileManager($this->httpClient), $this->filesystem);
-    }
-    if (!$this->updateHookManager) {
-      $this->updateHookManager = new UpdateHookManager($this->filesystem, $this->fileManager);
-    }
-    if (!$this->style) {
-      $this->style = new SymfonyStyle(Drush::input(), Drush::output());
-    }
     parent::__construct();
   }
 
   /**
    * {@inheritdoc}
    */
-  public static function createEarly(ContainerInterface $container) : self {
+  public static function create(ContainerInterface $container): self {
     $client = new Client(['base_uri' => self::BASE_URL]);
     $fileSystem = new Filesystem();
     $fileManager = new FileManager(new HttpFileManager($client), $fileSystem);
@@ -259,6 +244,8 @@ final class UpdateDrushCommands extends DrushCommands {
         'docker/openshift/crons/update-translations.sh',
         'docker/openshift/crons/pubsub.sh',
         'docker/openshift/crons/cron.sh',
+        'docker/openshift/crons/revision-queue.sh',
+        'docker/openshift/crons/menu-queue.sh',
         'docker/openshift/cron-entrypoint.sh',
         'docker/openshift/preflight/preflight.php',
         'docker/openshift/notify.php',

@@ -6,7 +6,10 @@
     "minimum-stability": "dev",
     "require": {
         "drupal/helfi_api_base": "*",
-        "drush/drush": "^11 || ^12 || ^13"
+        "drush/drush": "^12 || ^13"
+    },
+    "conflict": {
+        "drush/drush": "< 12.5"
     },
     "require-dev": {
         "composer/installers": "^2",
