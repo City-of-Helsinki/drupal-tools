@@ -81,7 +81,7 @@ class UpdateDrushCommandsTest extends TestCase {
     $container = new Container();
     $container->add('input', new ArgvInput());
     $container->add('output', new NullOutput());
-    $this->assertInstanceOf(UpdateDrushCommands::class, UpdateDrushCommands::createEarly($container));
+    $this->assertInstanceOf(UpdateDrushCommands::class, UpdateDrushCommands::create($container));
   }
 
   /**
