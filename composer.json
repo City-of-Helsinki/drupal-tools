@@ -6,7 +6,10 @@
     "minimum-stability": "dev",
     "require": {
         "drupal/helfi_api_base": "*",
-        "drush/drush": "^11 || ^12 || ^13"
+        "drush/drush": "^12 || ^13"
+    },
+    "conflict": {
+        "drush/drush": "< 12.5"
     },
     "require-dev": {
         "composer/installers": "^2",
@@ -53,7 +56,8 @@
             "composer/installers": true,
             "dealerdirect/phpcodesniffer-composer-installer": true,
             "phpstan/extension-installer": true,
-            "php-http/discovery": false
+            "php-http/discovery": false,
+            "tbachert/spi": false
         }
     },
     "extra": {
