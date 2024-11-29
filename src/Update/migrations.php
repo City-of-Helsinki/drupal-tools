@@ -225,6 +225,11 @@ function drupal_tools_update_10() : UpdateResult {
 function drupal_tools_update_11() : UpdateResult {
   (new Process(['composer', 'update', 'phpstan/phpstan', '-W']))
     ->run();
-  (new Process(['composer', 'require', 'dg/bypass-finals']))
+  (new Process(['composer', 'require', 'dg/bypass-finals:^1.5']))
     ->run();
+
+  return new UpdateResult([
+    'Updated phpstan/phpstan and dependencies.',
+    'Installed dg/bypass-finals package.',
+  ]);
 }
