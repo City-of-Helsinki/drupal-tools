@@ -249,6 +249,7 @@ final class UpdateDrushCommands extends DrushCommands {
         'docker/openshift/cron-entrypoint.sh',
         'docker/openshift/preflight/preflight.php',
         'docker/openshift/notify.php',
+        '.dockerignore',
         'compose.yaml',
         'phpcs.xml.dist',
         'phpunit.xml.dist',
