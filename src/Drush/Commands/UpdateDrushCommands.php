@@ -250,6 +250,7 @@ final class UpdateDrushCommands extends DrushCommands {
         'docker/openshift/preflight/preflight.php',
         'docker/openshift/notify.php',
         '.dockerignore',
+        'compose.ci.yaml',
         'compose.yaml',
         'phpcs.xml.dist',
         'phpunit.xml.dist',
