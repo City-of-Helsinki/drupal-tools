@@ -266,6 +266,7 @@ final class UpdateDrushCommands extends DrushCommands {
         'tests/dtt/src/ExistingSite/ModuleEnabledTest.php',
       ])
       ->updateFiles($options, [
+        '.github/dependabot.yml.dist' => '.github/dependabot.yml',
         '.github/workflows/test.yml.dist' => '.github/workflows/test.yml',
         '.github/workflows/artifact.yml.dist' => '.github/workflows/artifact.yml',
         '.github/workflows/update-config.yml.dist' => '.github/workflows/update-config.yml',
