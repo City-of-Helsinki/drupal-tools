@@ -244,3 +244,31 @@ function drupal_tools_update_12() : UpdateResult {
     'Re-installed dg/bypass-finals as dev dependency.',
   ]);
 }
+
+/**
+ * Remove direct dependency to packages provided by drupal/core-dev.
+ */
+function drupal_tools_update_13() : UpdateResult {
+  // Ensure drupal/core-dev is required.
+  (new Process(['composer', 'require', 'drupal/core-dev:^10', '--dev', '-W']))
+    ->run();
+
+  // For full list of drupal/core-dev dependencies,
+  // see: https://packagist.org/packages/drupal/core-dev.
+  // Already provided by drupal/core-dev:
+  $remove = [
+    'phpstan/phpstan',
+    'phpstan/extension-installer',
+    'mglaman/phpstan-drupal',
+    'phpunit/phpunit',
+    'drupal/coder',
+    'phpspec/prophecy-phpunit',
+  ];
+
+  (new Process(array_merge(['composer', 'remove', '--dev'], $remove)))
+    ->run();
+
+  return new UpdateResult([
+    'Removed direct dependency to ' . implode(', ', $remove),
+  ]);
+}
