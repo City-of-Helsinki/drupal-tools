@@ -152,7 +152,7 @@ $fileManager->updateFiles($options, [
 ```
 ## Checking composer package versions
 
-Checks whether HELfi packages are up-to-date. This is used as a part of our [Automatic update workflow](https://github.com/City-of-Helsinki/drupal-helfi-platform/blob/main/documentation/automatic-updates.md) to warn if composer was unable to update any of our dependencies.
+Checks ackages are up-to-date. This is used as a part of our [Automatic update workflow](https://github.com/City-of-Helsinki/drupal-helfi-platform/blob/main/documentation/automatic-updates.md) to warn if composer was unable to update any of our dependencies.
 
 Run `drush helfi:tools:check-composer-versions /path/to/composer.lock`.
 
