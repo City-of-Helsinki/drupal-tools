@@ -35,8 +35,7 @@
             "DrupalToolsTest\\": "tests/fixtures"
         },
         "classmap": [
-            "sut/core",
-            "sut/modules/contrib"
+            "sut/core"
         ],
         "files": [ "tests/fixtures/migration_fixture.php" ]
     },
