@@ -73,7 +73,7 @@ final class PackageScannerDrushCommands extends DrushCommands {
     'version' => 'Current version',
     'latest' => 'Latest version',
   ])]
-  public function checkVersions(?string $file = NULL, array $options = ['format' => 'table']) : CommandResult {
+  public function checkVersions(string $file, array $options = ['format' => 'table']) : CommandResult {
     $rows = [];
     foreach ($this->versionChecker->getOutdated($file) as $version) {
       // Skip dev versions since we can't easily verify the latest version.
