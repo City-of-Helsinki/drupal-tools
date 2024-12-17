@@ -6,7 +6,6 @@ namespace Drupal\Tests\helfi_drupal_tools\Kernel;
 
 use Consolidation\OutputFormatters\StructuredData\RowsOfFields;
 use Drupal\KernelTests\KernelTestBase;
-use Drupal\Tests\helfi_api_base\Traits\ApiTestTrait;
 use DrupalTools\Drush\Commands\PackageScannerDrushCommands;
 use DrupalTools\OutputFormatters\MarkdownTableFormatter;
 use DrupalTools\Package\ComposerOutdatedProcess;
@@ -25,13 +24,7 @@ use Psr\Container\ContainerInterface;
  */
 final class CheckPackageVersionsCommandsTest extends KernelTestBase {
 
-  use ApiTestTrait;
   use ProphecyTrait;
-
-  /**
-   * {@inheritdoc}
-   */
-  protected static $modules = ['helfi_api_base'];
 
   /**
    * Initialized a dummy Drush container.
