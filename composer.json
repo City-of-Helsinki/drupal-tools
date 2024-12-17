@@ -5,6 +5,7 @@
     "license": "GPL-2.0-or-later",
     "minimum-stability": "dev",
     "require": {
+        "drupal/helfi_api_base": "*",
         "drush/drush": "^12 || ^13"
     },
     "conflict": {
@@ -35,7 +36,8 @@
             "DrupalToolsTest\\": "tests/fixtures"
         },
         "classmap": [
-            "sut/core"
+            "sut/core",
+            "sut/modules/contrib"
         ],
         "files": [ "tests/fixtures/migration_fixture.php" ]
     },
