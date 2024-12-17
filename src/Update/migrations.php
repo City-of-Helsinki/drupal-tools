@@ -272,3 +272,18 @@ function drupal_tools_update_13() : UpdateResult {
     'Removed direct dependency to ' . implode(', ', $remove),
   ]);
 }
+
+/**
+ * Allow phpstan/extension-installer. This was accidentally removed update 13.
+ */
+function drupal_tools_update_14() : UpdateResult {
+  // Ensure drupal/core-dev is required.
+  (new Process([
+    'composer', 'config', 'allow-plugins.phpstan/extension-installer', 'true', '--no-interaction',
+  ]))
+    ->run();
+
+  return new UpdateResult([
+    'Added phpstan/extension-installer to allow-plugins',
+  ]);
+}
