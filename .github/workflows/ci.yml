@@ -12,15 +12,24 @@ jobs:
     strategy:
       matrix:
         php-versions: ['8.3', '8.4']
+    container:
+      image: ghcr.io/city-of-helsinki/drupal-web:${{ matrix.php-versions }}
+
+    services:
+      db:
+        image: mysql:8
+        env:
+          MYSQL_USER: drupal
+          MYSQL_PASSWORD: drupal
+          MYSQL_DATABASE: drupal
+          MYSQL_ROOT_PASSWORD: drupal
+        ports:
+          - 3306:3306
 
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup PHP with composer v2
-        uses: shivammathur/setup-php@v2
+      - uses: actions/checkout@v3
         with:
-          php-version: ${{ matrix.php-versions }}
-          tools: composer:v2
+          fetch-depth: 1
 
       - name: Install required composer dependencies
         run: composer install
