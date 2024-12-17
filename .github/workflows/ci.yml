@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - main
+env:
+  SYMFONY_DEPRECATIONS_HELPER: disabled
 name: CI
 jobs:
   tests:
@@ -10,24 +12,15 @@ jobs:
     strategy:
       matrix:
         php-versions: ['8.3', '8.4']
-    container:
-      image: ghcr.io/city-of-helsinki/drupal-php-docker:${{ matrix.php-versions }}-alpine
-
-    services:
-      db:
-        image: mysql:8
-        env:
-          MYSQL_USER: drupal
-          MYSQL_PASSWORD: drupal
-          MYSQL_DATABASE: drupal
-          MYSQL_ROOT_PASSWORD: drupal
-        ports:
-          - 3306:3306
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP with composer v2
+        uses: shivammathur/setup-php@v2
         with:
-          fetch-depth: 1
+          php-version: ${{ matrix.php-versions }}
+          tools: composer:v2
 
       - name: Install required composer dependencies
         run: composer install
