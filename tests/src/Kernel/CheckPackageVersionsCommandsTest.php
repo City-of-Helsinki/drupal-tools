@@ -9,10 +9,12 @@ use Drupal\KernelTests\KernelTestBase;
 use Drupal\Tests\helfi_api_base\Traits\ApiTestTrait;
 use DrupalTools\Drush\Commands\PackageScannerDrushCommands;
 use DrupalTools\OutputFormatters\MarkdownTableFormatter;
+use DrupalTools\Package\ComposerOutdatedProcess;
+use DrupalTools\Package\VersionChecker;
 use Drush\Commands\DrushCommands;
 use Drush\Formatters\DrushFormatterManager;
-use GuzzleHttp\Psr7\Response;
 use League\Container\Container;
+use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Container\ContainerInterface;
 
@@ -48,47 +50,34 @@ final class CheckPackageVersionsCommandsTest extends KernelTestBase {
    */
   public function testMarkdownTableFormatter() : void {
     $container = $this->getDrushContainer();
-    PackageScannerDrushCommands::create($this->container, $container);
+    PackageScannerDrushCommands::create($container);
     $this->assertInstanceOf(MarkdownTableFormatter::class, $container->get('formatterManager')->getFormatter('markdown_table'));
-  }
-
-  /**
-   * Tests version check with invalid composer.json file.
-   */
-  public function testInvalidComposerFileException() : void {
-    $sut = PackageScannerDrushCommands::create($this->container, $this->getDrushContainer());
-    $this->expectException(\RuntimeException::class);
-    $sut->checkVersions('nonexistent.lock');
   }
 
   /**
    * Tests version check.
    */
   public function testVersionCheck() : void {
-    $this->setupMockHttpClient([
-      new Response(body: json_encode([
-        'packages' => [
-          'drupal/helfi_api_base' => [
-            [
-              'name' => 'drupal/helfi_api_base',
-              'version' => '1.1.0',
-            ],
+    $process = $this->prophesize(ComposerOutdatedProcess::class);
+    $process->run(Argument::any())
+      ->willReturn([
+        // No packages need updating.
+      ], [
+        'installed' => [
+          [
+            'name' => 'drupal/helfi_api_base',
+            'latest' => '1.1.0',
+            'version' => '1.0.18',
           ],
         ],
-      ])),
-      new Response(body: json_encode([
-        'packages' => [
-          'drupal/helfi_api_base' => [
-            [
-              'name' => 'drupal/helfi_api_base',
-              'version' => '1.0.18',
-            ],
-          ],
-        ],
-      ])),
-    ]);
+      ]);
+    $versionChecker = new VersionChecker($process->reveal());
+    $sut = new PackageScannerDrushCommands($versionChecker);
 
-    $sut = PackageScannerDrushCommands::create($this->container, $this->getDrushContainer());
+    // Test with up-to-date version and make sure we exit with success.
+    $return = $sut->checkVersions(__DIR__ . '/../../fixtures/composer.lock');
+    $this->assertEquals(DrushCommands::EXIT_SUCCESS, $return->getExitCode());
+
     // Test with old version and make sure we exit with failure.
     $return = $sut->checkVersions(__DIR__ . '/../../fixtures/composer.lock');
     $this->assertEquals(DrushCommands::EXIT_FAILURE_WITH_CLARITY, $return->getExitCode());
@@ -101,10 +90,6 @@ final class CheckPackageVersionsCommandsTest extends KernelTestBase {
         'latest' => '1.1.0',
       ],
     ], $rows->getArrayCopy());
-
-    // Test with up-to-date version and make sure we exit with success.
-    $return = $sut->checkVersions(__DIR__ . '/../../fixtures/composer.lock');
-    $this->assertEquals(DrushCommands::EXIT_SUCCESS, $return->getExitCode());
   }
 
 }

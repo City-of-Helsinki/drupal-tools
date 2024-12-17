@@ -8,6 +8,7 @@ use DrupalTools\HttpFileManager;
 use DrupalTools\Update\FileManager;
 use DrupalTools\Update\UpdateOptions;
 use PHPUnit\Framework\TestCase;
+use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prediction\CallPrediction;
 use Prophecy\Prediction\NoCallsPrediction;
@@ -35,7 +36,7 @@ class FileManagerTest extends TestCase {
       // Make sure ensureFolder() is called.
       $filesystem->mkdir(dirname($name), 0755)
         ->should($prediction);
-      $client->copyFile($name, $name)
+      $client->copyFile($name, $name, Argument::any())
         ->should($prediction);
     }
 
@@ -87,13 +88,14 @@ class FileManagerTest extends TestCase {
       ->shouldBeCalled()
       ->willReturn(FALSE);
 
+    $options = new UpdateOptions();
+
     $client = $this->prophesize(HttpFileManager::class);
-    $client->copyFile('test1.yml.dist', 'test1.yml')
+    $client->copyFile('test1.yml.dist', 'test1.yml', Argument::is($options))
       ->shouldBeCalled();
-    $client->copyFile('test2.yml.dist', 'test2.yml.dist')
+    $client->copyFile('test2.yml.dist', 'test2.yml.dist', Argument::is($options))
       ->shouldBeCalled();
 
-    $options = new UpdateOptions();
     $sut = new FileManager($client->reveal(), $filesystem->reveal());
     // The test1.yml.dist should be updated as test1.yml because
     // test1.yml already exists.
@@ -172,9 +174,9 @@ class FileManagerTest extends TestCase {
    */
   public function testRemoteFile() : void {
     $client = $this->prophesize(HttpFileManager::class);
-    $client->copyFile('Dockerfile', 'Dockerfile')
+    $client->copyFile('Dockerfile', 'Dockerfile', Argument::any())
       ->shouldNotBeCalled();
-    $client->copyFile('Dockerfile.3', 'Dockerfile.3')
+    $client->copyFile('Dockerfile.3', 'Dockerfile.3', Argument::any())
       ->shouldBeCalled();
     $filesystem = $this->prophesize(Filesystem::class);
     $filesystem->exists('Dockerfile')

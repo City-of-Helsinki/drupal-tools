@@ -27,7 +27,7 @@ use Symfony\Component\Filesystem\Path;
 #[Bootstrap(DrupalBootLevels::NONE)]
 final class UpdateDrushCommands extends DrushCommands {
 
-  private const BASE_URL = 'https://raw.githubusercontent.com/City-of-Helsinki/drupal-helfi-platform/main/';
+  private const BASE_URL = 'https://raw.githubusercontent.com/City-of-Helsinki/drupal-helfi-platform/';
 
   /**
    * The git root.
@@ -37,6 +37,7 @@ final class UpdateDrushCommands extends DrushCommands {
   private ?string $gitRoot = NULL;
 
   public const DEFAULT_OPTIONS = [
+    'branch' => 'main',
     'ignore-files' => TRUE,
     'update-external-packages' => TRUE,
     'self-update' => TRUE,
@@ -124,6 +125,7 @@ final class UpdateDrushCommands extends DrushCommands {
 
     return new UpdateOptions(
       ignoreFiles: $ignoreFiles,
+      branch: $options['branch'],
       updateExternalPackages: $options['update-external-packages'],
       selfUpdate: $options['self-update'],
       runMigrations: $options['run-migrations'],
@@ -266,6 +268,7 @@ final class UpdateDrushCommands extends DrushCommands {
         'tests/dtt/src/ExistingSite/ModuleEnabledTest.php',
       ])
       ->updateFiles($options, [
+        '.github/dependabot.yml.dist' => '.github/dependabot.yml',
         '.github/workflows/test.yml.dist' => '.github/workflows/test.yml',
         '.github/workflows/artifact.yml.dist' => '.github/workflows/artifact.yml',
         '.github/workflows/update-config.yml.dist' => '.github/workflows/update-config.yml',

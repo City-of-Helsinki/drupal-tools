@@ -14,6 +14,8 @@ final class UpdateOptions {
    *
    * @param array $ignoreFiles
    *   Files to ignore. Leave empty to never ignore anything.
+   * @param string $branch
+   *   Helfi platform branch for file updates.
    * @param bool $updateExternalPackages
    *   Whether to update external packages.
    * @param bool $selfUpdate
@@ -25,6 +27,7 @@ final class UpdateOptions {
    */
   public function __construct(
     public array $ignoreFiles = [],
+    public string $branch = 'main',
     public bool $updateExternalPackages = TRUE,
     public bool $selfUpdate = TRUE,
     public bool $runMigrations = TRUE,

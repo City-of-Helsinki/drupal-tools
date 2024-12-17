@@ -102,7 +102,7 @@ class FileManager {
           $destination = $source;
         }
       }
-      $this->copyFile($source, $destination);
+      $this->copyFile($source, $destination, $options);
     }
 
     return $this;
@@ -136,13 +136,15 @@ class FileManager {
    *   The source.
    * @param string $destination
    *   The destination.
+   * @param \DrupalTools\Update\UpdateOptions $options
+   *   The update options.
    *
    * @throws \GuzzleHttp\Exception\GuzzleException
    * @throws \Symfony\Component\Filesystem\Exception\IOException
    */
-  private function copyFile(string $source, string $destination) : void {
+  private function copyFile(string $source, string $destination, UpdateOptions $options) : void {
     $this->ensureFolder($source);
-    $this->httpFileManager->copyFile($source, $destination);
+    $this->httpFileManager->copyFile($source, $destination, $options);
   }
 
   /**
@@ -235,7 +237,7 @@ class FileManager {
         if ($this->filesystem->exists($destination)) {
           continue;
         }
-        $this->copyFile($source, $destination);
+        $this->copyFile($source, $destination, $options);
 
         continue;
       }

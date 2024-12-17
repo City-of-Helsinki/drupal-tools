@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\helfi_drupal_tools\Unit;
 
 use DrupalTools\HttpFileManager;
+use DrupalTools\Update\UpdateOptions;
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
@@ -43,7 +44,7 @@ class HttpFileManagerTest extends TestCase {
       new Response(body: '123'),
     ]);
     $manager = new HttpFileManager($client);
-    $manager->copyFile('http://localhost/file', $filename);
+    $manager->copyFile('http://localhost/file', $filename, new UpdateOptions());
 
     $content = file_get_contents($filename);
     $this->assertSame('123', $content);
