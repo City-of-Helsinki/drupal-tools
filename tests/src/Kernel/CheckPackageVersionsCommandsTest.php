@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace Drupal\Tests\helfi_drupal_tools\Kernel;
 
 use Consolidation\OutputFormatters\StructuredData\RowsOfFields;
-use Drupal\helfi_api_base\Package\ComposerOutdatedProcess;
 use Drupal\KernelTests\KernelTestBase;
 use Drupal\Tests\helfi_api_base\Traits\ApiTestTrait;
 use DrupalTools\Drush\Commands\PackageScannerDrushCommands;
 use DrupalTools\OutputFormatters\MarkdownTableFormatter;
+use DrupalTools\Package\ComposerOutdatedProcess;
+use DrupalTools\Package\VersionChecker;
 use Drush\Commands\DrushCommands;
 use Drush\Formatters\DrushFormatterManager;
 use League\Container\Container;
@@ -49,17 +50,8 @@ final class CheckPackageVersionsCommandsTest extends KernelTestBase {
    */
   public function testMarkdownTableFormatter() : void {
     $container = $this->getDrushContainer();
-    PackageScannerDrushCommands::create($this->container, $container);
+    PackageScannerDrushCommands::create($container);
     $this->assertInstanceOf(MarkdownTableFormatter::class, $container->get('formatterManager')->getFormatter('markdown_table'));
-  }
-
-  /**
-   * Tests version check with invalid composer.json file.
-   */
-  public function testInvalidComposerFileException() : void {
-    $sut = PackageScannerDrushCommands::create($this->container, $this->getDrushContainer());
-    $this->expectException(\RuntimeException::class);
-    $sut->checkVersions('nonexistent.lock');
   }
 
   /**
@@ -79,16 +71,15 @@ final class CheckPackageVersionsCommandsTest extends KernelTestBase {
           ],
         ],
       ]);
-    $this->container->set(ComposerOutdatedProcess::class, $process->reveal());
-
-    $sut = PackageScannerDrushCommands::create($this->container, $this->getDrushContainer());
+    $versionChecker = new VersionChecker($process->reveal());
+    $sut = new PackageScannerDrushCommands($versionChecker);
 
     // Test with up-to-date version and make sure we exit with success.
-    $return = $sut->checkVersions();
+    $return = $sut->checkVersions(__DIR__ . '/../../fixtures/composer.lock');
     $this->assertEquals(DrushCommands::EXIT_SUCCESS, $return->getExitCode());
 
     // Test with old version and make sure we exit with failure.
-    $return = $sut->checkVersions();
+    $return = $sut->checkVersions(__DIR__ . '/../../fixtures/composer.lock');
     $this->assertEquals(DrushCommands::EXIT_FAILURE_WITH_CLARITY, $return->getExitCode());
     $rows = $return->getOutputData();
     $this->assertInstanceOf(RowsOfFields::class, $rows);

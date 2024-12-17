@@ -6,14 +6,15 @@ namespace DrupalTools\Drush\Commands;
 
 use Consolidation\AnnotatedCommand\CommandResult;
 use Consolidation\OutputFormatters\StructuredData\RowsOfFields;
-use Drupal\Component\DependencyInjection\ContainerInterface;
-use Drupal\helfi_api_base\Package\VersionChecker;
 use DrupalTools\OutputFormatters\MarkdownTableFormatter;
+use DrupalTools\Package\ComposerOutdatedProcess;
+use DrupalTools\Package\VersionChecker;
 use Drush\Attributes\Argument;
+use Drush\Attributes\Bootstrap;
 use Drush\Attributes\Command;
 use Drush\Attributes\FieldLabels;
+use Drush\Boot\DrupalBootLevels;
 use Drush\Commands\DrushCommands;
-use Drush\Drush;
 use Psr\Container\ContainerInterface as DrushContainer;
 
 /**
@@ -24,7 +25,7 @@ final class PackageScannerDrushCommands extends DrushCommands {
   /**
    * Constructs a new instance.
    *
-   * @param \Drupal\helfi_api_base\Package\VersionChecker $versionChecker
+   * @param \DrupalTools\Package\VersionChecker $versionChecker
    *   The version checker service.
    */
   public function __construct(
@@ -36,10 +37,7 @@ final class PackageScannerDrushCommands extends DrushCommands {
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $container, ?DrushContainer $drush = NULL): self {
-    if (!$drush && Drush::hasContainer()) {
-      $drush = Drush::getContainer();
-    }
+  public static function create(DrushContainer $drush): self {
     /** @var \Drush\Formatters\DrushFormatterManager $formatterManager */
     $formatterManager = $drush->get('formatterManager');
 
@@ -47,9 +45,11 @@ final class PackageScannerDrushCommands extends DrushCommands {
     if (!$formatterManager->hasFormatter('markdown_table')) {
       $formatterManager->addFormatter('markdown_table', new MarkdownTableFormatter());
     }
-    return new self(
-      $container->get('helfi_api_base.package_version_checker'),
-    );
+
+    $process = new ComposerOutdatedProcess();
+    $versionChecker = new VersionChecker($process);
+
+    return new self($versionChecker);
   }
 
   /**
@@ -66,6 +66,7 @@ final class PackageScannerDrushCommands extends DrushCommands {
    *   The result.
    */
   #[Command(name: 'helfi:tools:check-composer-versions')]
+  #[Bootstrap(level: DrupalBootLevels::NONE)]
   #[Argument(name: 'file', description: 'Path to composer.lock file')]
   #[FieldLabels(labels: [
     'name' => 'Name',
@@ -75,11 +76,8 @@ final class PackageScannerDrushCommands extends DrushCommands {
   public function checkVersions(?string $file = NULL, array $options = ['format' => 'table']) : CommandResult {
     $rows = [];
     foreach ($this->versionChecker->getOutdated($file) as $version) {
-      /** @var \Drupal\helfi_api_base\Package\Version $version */
-
-      // Skip dev versions since we can't easily verify the latest
-      // version.
-      if ($version->isLatest || str_starts_with($version->version, 'dev-')) {
+      // Skip dev versions since we can't easily verify the latest version.
+      if (str_starts_with($version->version, 'dev-')) {
         continue;
       }
 
