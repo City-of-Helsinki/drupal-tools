@@ -295,4 +295,7 @@ function drupal_tools_update_15(UpdateOptions $options, FileManager $fileManager
   $fileManager->removeFiles($options, [
     'tools',
   ]);
+  return new UpdateResult([
+    'Removed tools/ folder',
+  ]);
 }
