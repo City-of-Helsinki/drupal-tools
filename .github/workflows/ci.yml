@@ -43,6 +43,8 @@ jobs:
         run:
           vendor/bin/phpunit -c tests/phpunit.xml tests/
 
-      - name: Upload codecov
-        run: codecov
+      - uses: codecov/codecov-action@v5
+        with:
+          fail_ci_if_error: true
+          token: ${{ secrets.CODECOV_TOKEN }}
 
