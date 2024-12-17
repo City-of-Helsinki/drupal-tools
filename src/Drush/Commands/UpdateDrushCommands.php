@@ -126,39 +126,9 @@ final class UpdateDrushCommands extends DrushCommands {
     return new UpdateOptions(
       ignoreFiles: $ignoreFiles,
       branch: $options['branch'],
-      updateExternalPackages: $options['update-external-packages'],
       selfUpdate: $options['self-update'],
       runMigrations: $options['run-migrations'],
     );
-  }
-
-  /**
-   * Updates the dependencies.
-   *
-   * @param \DrupalTools\Update\UpdateOptions $options
-   *   The update options.
-   * @param string $root
-   *   The root directory.
-   *
-   * @return self
-   *   The self.
-   */
-  private function updateExternalPackages(UpdateOptions $options, string $root) : self {
-    if (!$options->updateExternalPackages) {
-      return $this;
-    }
-    $this->style->note('Checking external packages ...');
-
-    // Update druidfi/tools only if the package exists.
-    if ($this->filesystem->exists($root . '/tools')) {
-      $this->processManager()->process([
-        'make',
-        'self-update',
-      ])->run(function (string $type, ?string $output) : void {
-        $this->style->write($output);
-      });
-    }
-    return $this;
   }
 
   /**
@@ -257,11 +227,13 @@ final class UpdateDrushCommands extends DrushCommands {
         'phpcs.xml.dist',
         'phpunit.xml.dist',
         'phpunit.platform.xml',
-        'tools/make/override.mk',
-        'tools/make/project/install.mk',
-        'tools/make/project/git.mk',
-        'tools/make/project/theme.mk',
-        'tools/make/project/db-sync.sh',
+        'Makefile',
+        'tools/make/composer.mk',
+        'tools/make/docker.mk',
+        'tools/make/drupal.mk',
+        'tools/make/git.mk',
+        'tools/make/qa.mk',
+        'tools/make/theme.mk',
         'tools/commit-msg',
         '.sonarcloud.properties',
         '.github/pull_request_template.md',
@@ -325,7 +297,7 @@ final class UpdateDrushCommands extends DrushCommands {
 
       return DrushCommands::EXIT_FAILURE_WITH_CLARITY;
     }
-    $this->updateExternalPackages($options, $root)
+    $this
       ->runUpdateHooks($options, $root)
       ->updateDefaultFiles($options)
       ->addDefaultFiles($options);
