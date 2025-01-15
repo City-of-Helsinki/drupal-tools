@@ -287,3 +287,15 @@ function drupal_tools_update_14() : UpdateResult {
     'Added phpstan/extension-installer to allow-plugins',
   ]);
 }
+
+/**
+ * Remove druidfi/tools.
+ */
+function drupal_tools_update_15(UpdateOptions $options, FileManager $fileManager): UpdateResult {
+  $fileManager->removeFiles($options, [
+    'tools',
+  ]);
+  return new UpdateResult([
+    'Removed tools/ folder',
+  ]);
+}
