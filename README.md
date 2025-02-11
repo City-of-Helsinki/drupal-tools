@@ -26,7 +26,6 @@ This will:
 
 - Check if `drush/helfi_drupal_tools` package is up-to-date
 - Update/add files from [City-of-Helsinki/drupal-helfi-platform](https://github.com/City-of-Helsinki/drupal-helfi-platform) repository
-- Attempts to update external packages
 - Run the update hooks
 
 ### Self update
@@ -51,13 +50,6 @@ docker/openshift/Dockerfile
 ```
 
 This check can be bypassed with `--no-ignore-files` flag, meaning the files will be processed regardless of `ignore` file.
-
-### Update external tools
-
-At the moment, these tools are updated automatically:
-- https://github.com/druidfi/tools
-
-This can be disabled by passing `--no-update-external-packages` flag.
 
 ### Update hooks
 
