@@ -299,3 +299,16 @@ function drupal_tools_update_15(UpdateOptions $options, FileManager $fileManager
     'Removed tools/ folder',
   ]);
 }
+
+/**
+ * Remove 'cron-entrypoint.sh' because it's built into Docker image already.
+ */
+function drupal_tools_update_16(UpdateOptions $options, FileManager $fileManager) : UpdateResult {
+  $fileManager->removeFiles($options, [
+    'docker/openshift/cron-entrypoint.sh',
+  ]);
+
+  return new UpdateResult([
+    'Removed docker/openshift/cron-entrypoint.sh',
+  ]);
+}
