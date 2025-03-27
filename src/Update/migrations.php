@@ -312,3 +312,16 @@ function drupal_tools_update_16(UpdateOptions $options, FileManager $fileManager
     'Removed docker/openshift/cron-entrypoint.sh',
   ]);
 }
+
+/**
+ * Remove 'custom.locations' because it's built into Docker image.
+ */
+function drupal_tools_update_17(UpdateOptions $options, FileManager $fileManager) : UpdateResult {
+  $fileManager->removeFiles($options, [
+    'docker/openshift/custom.locations',
+  ]);
+
+  return new UpdateResult([
+    'Removed docker/openshift/custom.locations',
+  ]);
+}
