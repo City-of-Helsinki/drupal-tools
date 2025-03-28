@@ -203,7 +203,6 @@ final class UpdateDrushCommands extends DrushCommands {
         'public/sites/default/settings.php',
         'docker/elastic-proxy/elastic.conf',
         'docker/elastic-proxy/nginx.conf',
-        'docker/openshift/custom.locations',
         'docker/openshift/Dockerfile',
         'docker/openshift/init.sh',
         'docker/openshift/deploy/10-preflight.sh',
