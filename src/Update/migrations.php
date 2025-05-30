@@ -325,3 +325,16 @@ function drupal_tools_update_17(UpdateOptions $options, FileManager $fileManager
     'Removed docker/openshift/custom.locations',
   ]);
 }
+
+/**
+ * UHF-11676: Remove 'docker/openshift/crons/linked-events.sh'.
+ */
+function drupal_tools_update_18(UpdateOptions $options, FileManager $fileManager) : UpdateResult {
+  $fileManager->removeFiles($options, [
+    'docker/openshift/crons/linked-events.sh',
+  ]);
+
+  return new UpdateResult([
+    'Removed docker/openshift/crons/linked-events.sh',
+  ]);
+}
