@@ -211,7 +211,6 @@ final class UpdateDrushCommands extends DrushCommands {
         'docker/openshift/entrypoints/15-twig-compile.sh',
         'docker/openshift/crons/content-scheduler.sh',
         'docker/openshift/crons/migrate-tpr.sh',
-        'docker/openshift/crons/linked-events.sh',
         'docker/openshift/crons/prestop-hook.sh',
         'docker/openshift/crons/purge-queue.sh',
         'docker/openshift/crons/update-translations.sh',
