@@ -338,3 +338,15 @@ function drupal_tools_update_18(UpdateOptions $options, FileManager $fileManager
     'Removed docker/openshift/crons/linked-events.sh',
   ]);
 }
+
+/**
+ * UHF-11475: Update drush v13.
+ */
+function drupal_tools_update_19(UpdateOptions $options, FileManager $fileManager) : UpdateResult {
+  (new Process(['composer', 'require', 'drush/drush:^13', '-W']))
+    ->run();
+
+  return new UpdateResult([
+    'Updated drush to v13.',
+  ]);
+}
