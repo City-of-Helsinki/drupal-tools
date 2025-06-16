@@ -340,13 +340,13 @@ function drupal_tools_update_18(UpdateOptions $options, FileManager $fileManager
 }
 
 /**
- * UHF-11475: Update drush v13.
+ * UHF-11475: Remove direct dependency to drush.
  */
 function drupal_tools_update_19(UpdateOptions $options, FileManager $fileManager) : UpdateResult {
-  (new Process(['composer', 'require', 'drush/drush:^13', '-W']))
+  (new Process(['composer', 'remove', 'drush/drush']))
     ->run();
 
   return new UpdateResult([
-    'Updated drush to v13.',
+    'Removed direct dependency to drush',
   ]);
 }
