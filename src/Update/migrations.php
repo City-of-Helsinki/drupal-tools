@@ -338,3 +338,15 @@ function drupal_tools_update_18(UpdateOptions $options, FileManager $fileManager
     'Removed docker/openshift/crons/linked-events.sh',
   ]);
 }
+
+/**
+ * UHF-11475: Remove direct dependency to drush.
+ */
+function drupal_tools_update_19(UpdateOptions $options, FileManager $fileManager) : UpdateResult {
+  (new Process(['composer', 'remove', 'drush/drush']))
+    ->run();
+
+  return new UpdateResult([
+    'Removed direct dependency to drush',
+  ]);
+}
