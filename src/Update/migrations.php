@@ -350,3 +350,15 @@ function drupal_tools_update_19(UpdateOptions $options, FileManager $fileManager
     'Removed direct dependency to drush',
   ]);
 }
+
+/**
+ * UHF-11964: Move files to hooks folder.
+ */
+function drupal_tools_update_20(UpdateOptions $options, FileManager $fileManager) : UpdateResult {
+  (new Process(['rm', '-r', 'docker/openshift/post-db-replace', 'docker/openshift/deploy']))
+    ->run();
+
+  return new UpdateResult([
+    'Moved files to hooks folder',
+  ]);
+}
