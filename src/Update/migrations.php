@@ -362,3 +362,15 @@ function drupal_tools_update_20(UpdateOptions $options, FileManager $fileManager
     'Moved files to hooks folder',
   ]);
 }
+
+/**
+ * UHF-11150: Update drupal/core-dev
+ */
+function drupal_tools_update_21(UpdateOptions $options, FileManager $fileManager) : UpdateResult {
+  (new Process(['composer', 'require', 'drupal/core-dev:^10|^11', '--dev']))
+    ->run();
+
+  return new UpdateResult([
+    'Updated drupal/core-dev to ^10|^11.',
+  ]);
+}
