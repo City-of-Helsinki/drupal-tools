@@ -364,13 +364,24 @@ function drupal_tools_update_20(UpdateOptions $options, FileManager $fileManager
 }
 
 /**
- * UHF-11150: Update drupal/core-dev
+ * UHF-11150: Allow updating to Drupal 11
  */
 function drupal_tools_update_21(UpdateOptions $options, FileManager $fileManager) : UpdateResult {
   (new Process(['composer', 'require', 'drupal/core-dev:^10|^11', '--dev']))
     ->run();
 
+  (new Process(['composer', 'require', 'drupal/core-composer-scaffold:^10|^11']))
+    ->run();
+
+  // Remove drupal/core from root composer.json. Drupal
+  // version is set by drupal/helfi_platform_config.
+  // This command should fail with `Removal failed,
+  // drupal/core is still present, it may be required
+  // by another package.`.
+  (new Process(['composer', 'remove', 'drupal/core']))
+    ->run();
+
   return new UpdateResult([
-    'Updated drupal/core-dev to ^10|^11.',
+    'Updated Drupal packages.',
   ]);
 }
