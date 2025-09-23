@@ -373,6 +373,15 @@ function drupal_tools_update_21(UpdateOptions $options, FileManager $fileManager
   (new Process(['composer', 'require', 'drupal/core-composer-scaffold:^10|^11']))
     ->run();
 
+  // Allow big_pipe_sessionless with mglaman/composer-drupal-lenient.
+  // See: https://github.com/mglaman/composer-drupal-lenient.
+  (new Process(['composer', 'require', 'mglaman/composer-drupal-lenient']))
+    ->run();
+  (new Process(['composer', 'config', '--no-plugins', 'allow-plugins.mglaman/composer-drupal-lenient', 'true']))
+    ->run();
+  (new Process(['composer', 'config', '--merge', '--json', 'extra.drupal-lenient.allowed-list', '["drupal/big_pipe_sessionless"]']))
+    ->run();
+
   // Remove drupal/core from root composer.json. Drupal
   // version is set by drupal/helfi_platform_config.
   // This command should fail with `Removal failed,
