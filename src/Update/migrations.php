@@ -364,7 +364,7 @@ function drupal_tools_update_20(UpdateOptions $options, FileManager $fileManager
 }
 
 /**
- * UHF-11501: Allow updating to Drupal 11
+ * UHF-11501: Allow updating to Drupal 11.
  */
 function drupal_tools_update_21(UpdateOptions $options, FileManager $fileManager) : UpdateResult {
   (new Process(['composer', 'require', 'drupal/core-dev:^10|^11', '--dev']))
@@ -387,7 +387,7 @@ function drupal_tools_update_21(UpdateOptions $options, FileManager $fileManager
 }
 
 /**
- * UHF-11501: Install mglaman/composer-drupal-lenient
+ * UHF-11501: Install mglaman/composer-drupal-lenient.
  */
 function drupal_tools_update_22(UpdateOptions $options, FileManager $fileManager) : UpdateResult {
   // Allow big_pipe_sessionless with mglaman/composer-drupal-lenient.
@@ -398,7 +398,14 @@ function drupal_tools_update_22(UpdateOptions $options, FileManager $fileManager
     ->run();
 
   // Override modules that are currently blocking D11 update.
-  (new Process(['composer', 'config', '--merge', '--json', 'extra.drupal-lenient.allowed-list', '["drupal/big_pipe_sessionless"]']))
+  (new Process([
+    'composer',
+    'config',
+    '--merge',
+    '--json',
+    'extra.drupal-lenient.allowed-list',
+    '["drupal/big_pipe_sessionless"]',
+  ]))
     ->run();
 
   return new UpdateResult([
@@ -406,17 +413,20 @@ function drupal_tools_update_22(UpdateOptions $options, FileManager $fileManager
   ]);
 }
 
-
 /**
  * UHF-11150: Update hdbt subtheme core_version_requirement.
  */
 function drupal_tools_update_23(UpdateOptions $options, FileManager $fileManager) : UpdateResult {
   // Update core_version_requirement in hdbt_subtheme.
-  (new Process(['sed', '-i', 's/^core_version_requirement: .*/core_version_requirement: ^10 || ^11/', 'public/themes/custom/hdbt_subtheme/hdbt_subtheme.info.yml']))
+  (new Process([
+    'sed',
+    '-i',
+    's/^core_version_requirement: .*/core_version_requirement: ^10 || ^11/',
+    'public/themes/custom/hdbt_subtheme/hdbt_subtheme.info.yml',
+  ]))
     ->mustRun();
 
   return new UpdateResult([
     'Updated hdbt_subtheme.info.yml.',
   ]);
 }
-
