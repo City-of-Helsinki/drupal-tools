@@ -430,3 +430,21 @@ function drupal_tools_update_23(UpdateOptions $options, FileManager $fileManager
     'Updated hdbt_subtheme.info.yml.',
   ]);
 }
+
+/**
+ * Update composer installers to new major version.
+ */
+function drupal_tools_update_24(UpdateOptions $options, FileManager $fileManager) : UpdateResult {
+  (new Process([
+    'composer',
+    'require',
+    'composer/installers',
+    '^2.0',
+    '-W',
+  ]))
+    ->run();
+
+  return new UpdateResult([
+    'Updated composer/installers to ^2.0',
+  ]);
+}
