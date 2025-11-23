@@ -228,7 +228,6 @@ final class UpdateDrushCommands extends DrushCommands {
         'compose.yaml',
         'phpcs.xml.dist',
         'phpunit.xml.dist',
-        'phpunit.platform.xml',
         'Makefile',
         'tools/make/composer.mk',
         'tools/make/docker.mk',
