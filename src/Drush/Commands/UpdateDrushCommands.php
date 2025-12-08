@@ -238,6 +238,7 @@ final class UpdateDrushCommands extends DrushCommands {
         'tools/commit-msg',
         '.sonarcloud.properties',
         '.github/pull_request_template.md',
+        '.deprecation-ignore.txt',
         'tests/dtt/src/ExistingSite/ModuleEnabledTest.php',
       ])
       ->updateFiles($options, [
