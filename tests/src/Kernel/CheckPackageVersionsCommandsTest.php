@@ -6,7 +6,7 @@ namespace Drupal\Tests\helfi_drupal_tools\Kernel;
 
 use Consolidation\OutputFormatters\StructuredData\RowsOfFields;
 use Drupal\KernelTests\KernelTestBase;
-use DrupalTools\Commands\PackageScannerCommand;
+use DrupalTools\Drush\Commands\PackageScannerCommand;
 use DrupalTools\OutputFormatters\MarkdownTableFormatter;
 use DrupalTools\Package\ComposerOutdatedProcess;
 use DrupalTools\Package\VersionChecker;

@@ -2,12 +2,10 @@
 
 declare(strict_types=1);
 
-namespace DrupalTools\Commands;
+namespace DrupalTools\Drush\Commands;
 
 use Consolidation\OutputFormatters\FormatterManager;
-use DrupalTools\Package\VersionChecker;
 use Drush\Attributes\Bootstrap;
-use Drush\Attributes\FieldLabels;
 use Drush\Boot\DrupalBootLevels;
 use Drush\Commands\AutowireTrait;
 use Drush\Commands\DrushCommands;
@@ -18,7 +16,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(
-  name: 'helfi:tools:check-composer-versions',
+  name: self::NAME,
   description: 'Checks whether Composer packages are up-to-date and formats the results',
 )]
 #[Bootstrap(level: DrupalBootLevels::NONE)]
@@ -27,11 +25,16 @@ final class PackageScannerCommand extends Command {
   use AutowireTrait;
   use FormatterTrait;
 
+  public const string NAME = 'helfi:tools:check-composer-versions';
+
   public function __construct(
     private readonly FormatterManager $formatterManager,
-    private readonly VersionChecker $versionChecker,
   ) {
     parent::__construct();
+  }
+
+  public function configure(): void {
+    $this->addUsage('test');
   }
 
   /**
