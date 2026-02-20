@@ -17,19 +17,16 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-#[AsCommand(name: 'helfi:tools:check-composer-versions')]
+#[AsCommand(
+  name: 'helfi:tools:check-composer-versions',
+  description: 'Checks whether Composer packages are up-to-date and formats the results',
+)]
 #[Bootstrap(level: DrupalBootLevels::NONE)]
-final class PackageScannerDrushCommand extends Command {
+final class PackageScannerCommand extends Command {
 
   use AutowireTrait;
   use FormatterTrait;
 
-  /**
-   * Constructs a new instance.
-   *
-   * @param \DrupalTools\Package\VersionChecker $versionChecker
-   *   The version checker service.
-   */
   public function __construct(
     private readonly FormatterManager $formatterManager,
     private readonly VersionChecker $versionChecker,
@@ -67,12 +64,6 @@ final class PackageScannerDrushCommand extends Command {
    * @return \Consolidation\AnnotatedCommand\CommandResult
    *   The result.
    */
-  #[Bootstrap(level: DrupalBootLevels::NONE)]
-  #[FieldLabels(labels: [
-    'name' => 'Name',
-    'version' => 'Current version',
-    'latest' => 'Latest version',
-  ])]
   public function execute(InputInterface $input, OutputInterface $output) : int {
     $rows = [];
     foreach ($this->versionChecker->getOutdated($file) as $version) {

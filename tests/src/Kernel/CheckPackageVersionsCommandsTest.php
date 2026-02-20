@@ -6,7 +6,7 @@ namespace Drupal\Tests\helfi_drupal_tools\Kernel;
 
 use Consolidation\OutputFormatters\StructuredData\RowsOfFields;
 use Drupal\KernelTests\KernelTestBase;
-use DrupalTools\Commands\PackageScannerDrushCommand;
+use DrupalTools\Commands\PackageScannerCommand;
 use DrupalTools\OutputFormatters\MarkdownTableFormatter;
 use DrupalTools\Package\ComposerOutdatedProcess;
 use DrupalTools\Package\VersionChecker;
@@ -43,7 +43,7 @@ final class CheckPackageVersionsCommandsTest extends KernelTestBase {
    */
   public function testMarkdownTableFormatter() : void {
     $container = $this->getDrushContainer();
-    PackageScannerDrushCommand::create($container);
+    PackageScannerCommand::create($container);
     $this->assertInstanceOf(MarkdownTableFormatter::class, $container->get('formatterManager')->getFormatter('markdown_table'));
   }
 
@@ -65,7 +65,7 @@ final class CheckPackageVersionsCommandsTest extends KernelTestBase {
         ],
       ]);
     $versionChecker = new VersionChecker($process->reveal());
-    $sut = new PackageScannerDrushCommand($versionChecker);
+    $sut = new PackageScannerCommand($versionChecker);
 
     // Test with up-to-date version and make sure we exit with success.
     $return = $sut->checkVersions(__DIR__ . '/../../fixtures/composer.lock');
