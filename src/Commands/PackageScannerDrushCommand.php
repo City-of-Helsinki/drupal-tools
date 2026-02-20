@@ -2,25 +2,27 @@
 
 declare(strict_types=1);
 
-namespace DrupalTools\Drush\Commands;
+namespace DrupalTools\Commands;
 
-use Consolidation\AnnotatedCommand\CommandResult;
-use Consolidation\OutputFormatters\StructuredData\RowsOfFields;
-use DrupalTools\OutputFormatters\MarkdownTableFormatter;
-use DrupalTools\Package\ComposerOutdatedProcess;
+use Consolidation\OutputFormatters\FormatterManager;
 use DrupalTools\Package\VersionChecker;
-use Drush\Attributes\Argument;
 use Drush\Attributes\Bootstrap;
-use Drush\Attributes\Command;
 use Drush\Attributes\FieldLabels;
 use Drush\Boot\DrupalBootLevels;
+use Drush\Commands\AutowireTrait;
 use Drush\Commands\DrushCommands;
-use Psr\Container\ContainerInterface as DrushContainer;
+use Drush\Formatters\FormatterTrait;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
-/**
- * A drush command to check whether given Helfi packages are up-to-date.
- */
-final class PackageScannerDrushCommands extends DrushCommands {
+#[AsCommand(name: 'helfi:tools:check-composer-versions')]
+#[Bootstrap(level: DrupalBootLevels::NONE)]
+final class PackageScannerDrushCommand extends Command {
+
+  use AutowireTrait;
+  use FormatterTrait;
 
   /**
    * Constructs a new instance.
@@ -29,6 +31,7 @@ final class PackageScannerDrushCommands extends DrushCommands {
    *   The version checker service.
    */
   public function __construct(
+    private readonly FormatterManager $formatterManager,
     private readonly VersionChecker $versionChecker,
   ) {
     parent::__construct();
@@ -37,8 +40,7 @@ final class PackageScannerDrushCommands extends DrushCommands {
   /**
    * {@inheritdoc}
    */
-  public static function create(DrushContainer $drush): self {
-    /** @var \Drush\Formatters\DrushFormatterManager $formatterManager */
+  /*public static function create(DrushContainer $drush): self {
     $formatterManager = $drush->get('formatterManager');
 
     // @todo Figure out if there's a better way to inject this service.
@@ -50,7 +52,7 @@ final class PackageScannerDrushCommands extends DrushCommands {
     $versionChecker = new VersionChecker($process);
 
     return new self($versionChecker);
-  }
+  }*/
 
   /**
    * Checks whether Composer packages are up-to-date.
@@ -65,15 +67,13 @@ final class PackageScannerDrushCommands extends DrushCommands {
    * @return \Consolidation\AnnotatedCommand\CommandResult
    *   The result.
    */
-  #[Command(name: 'helfi:tools:check-composer-versions')]
   #[Bootstrap(level: DrupalBootLevels::NONE)]
-  #[Argument(name: 'file', description: 'Path to composer.lock file')]
   #[FieldLabels(labels: [
     'name' => 'Name',
     'version' => 'Current version',
     'latest' => 'Latest version',
   ])]
-  public function checkVersions(string $file, array $options = ['format' => 'table']) : CommandResult {
+  public function execute(InputInterface $input, OutputInterface $output) : int {
     $rows = [];
     foreach ($this->versionChecker->getOutdated($file) as $version) {
       // Skip dev versions since we can't easily verify the latest version.
@@ -90,7 +90,8 @@ final class PackageScannerDrushCommands extends DrushCommands {
 
     $exitCode = $rows ? DrushCommands::EXIT_FAILURE_WITH_CLARITY : DrushCommands::EXIT_SUCCESS;
 
-    return CommandResult::dataWithExitCode(new RowsOfFields($rows), $exitCode);
+    //return CommandResult::dataWithExitCode(new RowsOfFields($rows), $exitCode);
+    return 1;
   }
 
 }
