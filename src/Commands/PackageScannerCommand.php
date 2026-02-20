@@ -19,7 +19,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 #[AsCommand(name: 'helfi:tools:check-composer-versions')]
 #[Bootstrap(level: DrupalBootLevels::NONE)]
-final class PackageScannerDrushCommand extends Command {
+final class PackageScannerCommand extends Command {
 
   use AutowireTrait;
   use FormatterTrait;
