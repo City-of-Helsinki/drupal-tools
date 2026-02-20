@@ -20,7 +20,7 @@ use Symfony\Component\Console\Output\OutputInterface;
   description: 'Checks whether Composer packages are up-to-date and formats the results',
 )]
 #[Bootstrap(level: DrupalBootLevels::NONE)]
-final class PackageScannerCommand extends Command {
+final class PackageScannerCommands extends Command {
 
   use AutowireTrait;
   use FormatterTrait;
