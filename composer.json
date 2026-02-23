@@ -26,9 +26,15 @@
     },
     "prefer-stable": true,
     "autoload": {
+        "psr-4": {
+            "DrupalTools\\": "src"
+        },
         "files": [ "src/Update/migrations.php" ]
     },
     "autoload-dev": {
+        "psr-4": {
+            "DrupalToolsTest\\": "tests/fixtures"
+        },
         "classmap": [
             "sut/core",
             "sut/modules/contrib"

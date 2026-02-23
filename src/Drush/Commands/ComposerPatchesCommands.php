@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+namespace DrupalTools\Drush\Commands;
+
 use Consolidation\AnnotatedCommand\CommandResult;
 use Drush\Attributes\Argument;
 use Drush\Attributes\Bootstrap;
