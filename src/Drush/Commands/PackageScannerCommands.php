@@ -2,11 +2,10 @@
 
 declare(strict_types=1);
 
-namespace DrupalTools\Commands;
+namespace DrupalTools\Drush\Commands;
 
 use Consolidation\OutputFormatters\FormatterManager;
 use Consolidation\OutputFormatters\StructuredData\RowsOfFields;
-use DrupalTools\Package\VersionChecker;
 use Drush\Attributes\Bootstrap;
 use Drush\Attributes\FieldLabels;
 use Drush\Attributes\Formatter;
