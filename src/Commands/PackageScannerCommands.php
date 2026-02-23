@@ -2,16 +2,21 @@
 
 declare(strict_types=1);
 
-namespace DrupalTools\Drush\Commands;
+namespace Drush\Commands\helfi_drupal_tools\Commands;
 
 use Consolidation\OutputFormatters\FormatterManager;
+use Consolidation\OutputFormatters\StructuredData\RowsOfFields;
+use DrupalTools\Package\VersionChecker;
 use Drush\Attributes\Bootstrap;
+use Drush\Attributes\FieldLabels;
+use Drush\Attributes\Formatter;
 use Drush\Boot\DrupalBootLevels;
 use Drush\Commands\AutowireTrait;
 use Drush\Commands\DrushCommands;
 use Drush\Formatters\FormatterTrait;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -20,6 +25,12 @@ use Symfony\Component\Console\Output\OutputInterface;
   description: 'Checks whether Composer packages are up-to-date and formats the results',
 )]
 #[Bootstrap(level: DrupalBootLevels::NONE)]
+#[FieldLabels(labels: [
+  'name' => 'Name',
+  'version' => 'Current version',
+  'latest' => 'Latest version',
+])]
+#[Formatter(returnType: RowsOfFields::class, defaultFormatter: 'table')]
 final class PackageScannerCommands extends Command {
 
   use AutowireTrait;
@@ -34,7 +45,7 @@ final class PackageScannerCommands extends Command {
   }
 
   public function configure(): void {
-    $this->addUsage('test');
+    $this->addArgument('file', InputArgument::REQUIRED);
   }
 
   /**
@@ -54,20 +65,7 @@ final class PackageScannerCommands extends Command {
     return new self($versionChecker);
   }*/
 
-  /**
-   * Checks whether Composer packages are up-to-date.
-   *
-   * Wrapper for `composer outdated` command.
-   *
-   * @param string $file
-   *   The path to composer.lock file.
-   * @param array $options
-   *   The options.
-   *
-   * @return \Consolidation\AnnotatedCommand\CommandResult
-   *   The result.
-   */
-  public function execute(InputInterface $input, OutputInterface $output) : int {
+  private function doExecute(string $file): RowsOfFields {
     $rows = [];
     foreach ($this->versionChecker->getOutdated($file) as $version) {
       // Skip dev versions since we can't easily verify the latest version.
@@ -83,9 +81,24 @@ final class PackageScannerCommands extends Command {
     }
 
     $exitCode = $rows ? DrushCommands::EXIT_FAILURE_WITH_CLARITY : DrushCommands::EXIT_SUCCESS;
+  }
 
-    //return CommandResult::dataWithExitCode(new RowsOfFields($rows), $exitCode);
-    return 1;
+  /**
+   * Checks whether Composer packages are up-to-date.
+   *
+   * Wrapper for `composer outdated` command.
+   *
+   * @param string $file
+   *   The path to composer.lock file.
+   * @param array $options
+   *   The options.
+   *
+   * @return \Consolidation\AnnotatedCommand\CommandResult
+   *   The result.
+   */
+  public function execute(InputInterface $input, OutputInterface $output) : int {
+    $result = $this->doExecute($input->getArgument('file'));
+    $this->writeFormattedOutput($input, $output, $this->doExecute($input->getArgument('file')));
   }
 
 }
