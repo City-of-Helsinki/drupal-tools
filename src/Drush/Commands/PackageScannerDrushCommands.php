@@ -6,7 +6,7 @@ namespace DrupalTools\Drush\Commands;
 
 use Consolidation\AnnotatedCommand\CommandResult;
 use Consolidation\OutputFormatters\StructuredData\RowsOfFields;
-use DrupalTools\OutputFormatters\MarkdownTableFormatter;
+use DrupalTools\OutputFormatters\FormatterManagerTrait;
 use DrupalTools\Package\ComposerOutdatedProcess;
 use DrupalTools\Package\VersionChecker;
 use Drush\Attributes\Argument;
@@ -15,12 +15,14 @@ use Drush\Attributes\Command;
 use Drush\Attributes\FieldLabels;
 use Drush\Boot\DrupalBootLevels;
 use Drush\Commands\DrushCommands;
-use Psr\Container\ContainerInterface as DrushContainer;
+use Psr\Container\ContainerInterface;
 
 /**
  * A drush command to check whether given Helfi packages are up-to-date.
  */
 final class PackageScannerDrushCommands extends DrushCommands {
+
+  use FormatterManagerTrait;
 
   /**
    * Constructs a new instance.
@@ -37,14 +39,8 @@ final class PackageScannerDrushCommands extends DrushCommands {
   /**
    * {@inheritdoc}
    */
-  public static function create(DrushContainer $drush): self {
-    /** @var \Drush\Formatters\DrushFormatterManager $formatterManager */
-    $formatterManager = $drush->get('formatterManager');
-
-    // @todo Figure out if there's a better way to inject this service.
-    if (!$formatterManager->hasFormatter('markdown_table')) {
-      $formatterManager->addFormatter('markdown_table', new MarkdownTableFormatter());
-    }
+  public static function create(ContainerInterface $drush): self {
+    self::populateFormatterManager($drush);
 
     $process = new ComposerOutdatedProcess();
     $versionChecker = new VersionChecker($process);
