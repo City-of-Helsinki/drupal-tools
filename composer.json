@@ -13,7 +13,7 @@
     },
     "require-dev": {
         "composer/installers": "^2",
-        "drupal/core-recommended": "^10.2",
+        "drupal/core-recommended": "^11.3",
         "drupal/core-dev": "^11.3"
     },
     "prefer-stable": true,
@@ -49,7 +49,8 @@
             "dealerdirect/phpcodesniffer-composer-installer": true,
             "phpstan/extension-installer": true,
             "php-http/discovery": false,
-            "tbachert/spi": false
+            "tbachert/spi": false,
+            "drupal/core-composer-scaffold": true
         }
     },
     "extra": {
