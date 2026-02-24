@@ -28,4 +28,3 @@ trait FormatterManagerTrait {
   }
 
 }
-

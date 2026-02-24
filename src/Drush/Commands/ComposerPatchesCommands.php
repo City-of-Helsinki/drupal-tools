@@ -64,7 +64,6 @@ final class ComposerPatchesCommands extends DrushCommands {
       }
     }
 
-
     // Support old Drupal.org patch workflow.
     if (str_starts_with($patch, 'https://www.drupal.org/files/issues/')) {
       return TRUE;
@@ -191,4 +190,3 @@ final class ComposerPatchesCommands extends DrushCommands {
   }
 
 }
-
