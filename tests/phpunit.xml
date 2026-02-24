@@ -32,11 +32,11 @@
   </testsuites>
   <source ignoreSuppressionOfDeprecations="true">
     <include>
-      <directory>./</directory>
+      <directory>../</directory>
     </include>
     <exclude>
       <file>../src/Drush/Commands/HelperDrushCommands.php</file>
-      <directory>./tests</directory>
+      <directory>../tests</directory>
     </exclude>
   </source>
   <coverage>
