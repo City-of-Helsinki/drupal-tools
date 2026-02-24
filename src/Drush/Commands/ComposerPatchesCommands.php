@@ -85,7 +85,7 @@ final class ComposerPatchesCommands extends DrushCommands {
 
     try {
       // Make sure the package exists in our Composer repository.
-      $this->client->get($url);
+      $this->client->request('GET', $url);
 
       return TRUE;
     }

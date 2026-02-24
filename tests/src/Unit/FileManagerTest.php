@@ -27,7 +27,7 @@ class FileManagerTest extends TestCase {
   /**
    * Tests that updateFiles() work with ignoreFiles option.
    */
-  #[DataProvider(methodName: 'updateFilesIgnoreData')]
+  #[DataProvider('updateFilesIgnoreData')]
   public function testUpdateFilesIgnore(array $ignoreFiles, array $files) : void {
     $filesystem = $this->prophesize(Filesystem::class);
     $client = $this->prophesize(HttpFileManager::class);
@@ -125,7 +125,7 @@ class FileManagerTest extends TestCase {
   /**
    * Tests ignoreFiles option with addFiles().
    */
-  #[DataProvider(methodName: 'addFilesIgnoreFilesData')]
+  #[DataProvider('addFilesIgnoreFilesData')]
   public function testAddFilesIgnoreFiles(array $ignoreFiles, array $files) : void {
     $client = $this->prophesize(HttpFileManager::class);
     $filesystem = $this->prophesize(Filesystem::class);
@@ -256,7 +256,7 @@ class FileManagerTest extends TestCase {
   /**
    * Tests that removed files work with ignoreFiles option.
    */
-  #[DataProvider(methodName: 'removeIgnoreFilesData')]
+  #[DataProvider('removeIgnoreFilesData')]
   public function testRemoveIgnoreFiles(array $ignoreFiles, array $files) : void {
     $client = $this->prophesize(HttpFileManager::class);
     $filesystem = $this->prophesize(Filesystem::class);

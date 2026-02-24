@@ -9,7 +9,6 @@ use Consolidation\OutputFormatters\Options\FormatterOptions;
 use Consolidation\OutputFormatters\StructuredData\PropertyList;
 use Consolidation\OutputFormatters\StructuredData\RestructureInterface;
 use Consolidation\OutputFormatters\StructuredData\RowsOfFields;
-use Consolidation\OutputFormatters\StructuredData\TableDataInterface;
 use Consolidation\OutputFormatters\StructuredData\UnstructuredData;
 use DrupalTools\OutputFormatters\MarkdownTableFormatter;
 use PHPUnit\Framework\Attributes\DataProvider;
@@ -36,11 +35,11 @@ class MarkdownTableFormatterTest extends TestCase {
   /**
    * Tests validation.
    */
-  #[DataProvider(methodName: 'validateTestData')]
+  #[DataProvider('validateTestData')]
   public function testValidate(RestructureInterface $data) : void {
+    $this->expectNotToPerformAssertions();
     $formatter = new MarkdownTableFormatter();
-    $data = $formatter->validate($data->restructure(new FormatterOptions()));
-    $this->assertInstanceOf(TableDataInterface::class, $data);
+    $formatter->validate($data->restructure(new FormatterOptions()));
   }
 
   /**

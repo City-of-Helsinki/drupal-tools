@@ -12,6 +12,8 @@ use Consolidation\OutputFormatters\Formatters\MetadataFormatterTrait;
 use Consolidation\OutputFormatters\Formatters\RenderDataInterface;
 use Consolidation\OutputFormatters\Formatters\RenderTableDataTrait;
 use Consolidation\OutputFormatters\Options\FormatterOptions;
+use Consolidation\OutputFormatters\StructuredData\PropertyList;
+use Consolidation\OutputFormatters\StructuredData\RowsOfFields;
 use Consolidation\OutputFormatters\StructuredData\TableDataInterface;
 use Consolidation\OutputFormatters\Transformations\TableTransformation;
 use Consolidation\OutputFormatters\Validate\ValidDataTypesInterface;
@@ -19,7 +21,7 @@ use Consolidation\OutputFormatters\Validate\ValidDataTypesTrait;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Formats a table using markdown formatter.
+ * Formats a table using Markdown formatter.
  */
 final class MarkdownTableFormatter implements FormatterInterface, ValidDataTypesInterface, RenderDataInterface, MetadataFormatterInterface, HumanReadableFormat {
 
@@ -60,13 +62,13 @@ final class MarkdownTableFormatter implements FormatterInterface, ValidDataTypes
   /**
    * {@inheritdoc}
    *
-   * @return array{\ReflectionClass<\Consolidation\OutputFormatters\StructuredData\RowsOfFields|\Consolidation\OutputFormatters\StructuredData\PropertyList>}
+   * @return array
    *   The valid data types.
    */
   public function validDataTypes() : array {
     return [
-      new \ReflectionClass('\Consolidation\OutputFormatters\StructuredData\RowsOfFields'),
-      new \ReflectionClass('\Consolidation\OutputFormatters\StructuredData\PropertyList'),
+      new \ReflectionClass(RowsOfFields::class),
+      new \ReflectionClass(PropertyList::class),
     ];
   }
 

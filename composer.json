@@ -14,7 +14,8 @@
     "require-dev": {
         "composer/installers": "^2",
         "drupal/core-recommended": "^11.3",
-        "drupal/core-dev": "^11.3"
+        "drupal/core-dev": "^11.3",
+        "jangregor/phpstan-prophecy": "^2.3"
     },
     "prefer-stable": true,
     "autoload": {
@@ -50,7 +51,7 @@
             "phpstan/extension-installer": true,
             "php-http/discovery": false,
             "tbachert/spi": false,
-            "drupal/core-composer-scaffold": true
+            "drupal/core-composer-scaffold": false
         }
     },
     "extra": {
