@@ -104,8 +104,7 @@ final class ComposerPatchesCommands extends DrushCommands {
    *   An array of patched packages.
    */
   private function getPatchedPackages(string $file): array {
-    $data = json_decode(file_get_contents($file), TRUE);
-
+    $data = json_decode(file_get_contents($file), TRUE, flags: JSON_THROW_ON_ERROR);
     $packages = [];
 
     foreach ($data['packages'] as $package) {

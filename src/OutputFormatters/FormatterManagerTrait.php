@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace DrupalTools\OutputFormatters;
 
+use Consolidation\OutputFormatters\FormatterManager;
 use Psr\Container\ContainerInterface;
 
 /**
@@ -18,8 +19,12 @@ trait FormatterManagerTrait {
    *   The drush container.
    */
   public static function populateFormatterManager(ContainerInterface $drush): void {
-    /** @var \Drush\Formatters\DrushFormatterManager $formatterManager */
+    /** @var \Consolidation\OutputFormatters\FormatterManager $formatterManager */
     $formatterManager = $drush->get('formatterManager');
+
+    if (!$formatterManager instanceof FormatterManager) {
+      throw new \LogicException('Formatter manager is not set.');
+    }
 
     // @todo Figure out if there's a better way to inject this service.
     if (!$formatterManager->hasFormatter('markdown_table')) {
