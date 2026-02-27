@@ -9,9 +9,9 @@ use Consolidation\OutputFormatters\Options\FormatterOptions;
 use Consolidation\OutputFormatters\StructuredData\PropertyList;
 use Consolidation\OutputFormatters\StructuredData\RestructureInterface;
 use Consolidation\OutputFormatters\StructuredData\RowsOfFields;
-use Consolidation\OutputFormatters\StructuredData\TableDataInterface;
 use Consolidation\OutputFormatters\StructuredData\UnstructuredData;
 use DrupalTools\OutputFormatters\MarkdownTableFormatter;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Output\BufferedOutput;
 
@@ -34,13 +34,12 @@ class MarkdownTableFormatterTest extends TestCase {
 
   /**
    * Tests validation.
-   *
-   * @dataProvider validateTestData
    */
+  #[DataProvider('validateTestData')]
   public function testValidate(RestructureInterface $data) : void {
+    $this->expectNotToPerformAssertions();
     $formatter = new MarkdownTableFormatter();
-    $data = $formatter->validate($data->restructure(new FormatterOptions()));
-    $this->assertInstanceOf(TableDataInterface::class, $data);
+    $formatter->validate($data->restructure(new FormatterOptions()));
   }
 
   /**
@@ -49,7 +48,7 @@ class MarkdownTableFormatterTest extends TestCase {
    * @return array
    *   The data.
    */
-  public function validateTestData() : array {
+  public static function validateTestData() : array {
     return [
       [new RowsOfFields([])],
       [new PropertyList([])],

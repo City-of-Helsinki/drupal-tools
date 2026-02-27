@@ -7,7 +7,6 @@ parameters:
     - sut
     - vendor
     - src/Drush/Commands/HelperDrushCommands.php
-    - src/Drush/Commands/OpenShiftDrushCommands.php
   level: 6
   treatPhpDocTypesAsCertain: false
   ignoreErrors:

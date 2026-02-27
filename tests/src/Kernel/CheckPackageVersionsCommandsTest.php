@@ -13,6 +13,7 @@ use DrupalTools\Package\VersionChecker;
 use Drush\Commands\DrushCommands;
 use Drush\Formatters\DrushFormatterManager;
 use League\Container\Container;
+use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Container\ContainerInterface;
@@ -22,6 +23,7 @@ use Psr\Container\ContainerInterface;
  *
  * @group helfi_drupal_tools
  */
+#[RunTestsInSeparateProcesses]
 final class CheckPackageVersionsCommandsTest extends KernelTestBase {
 
   use ProphecyTrait;

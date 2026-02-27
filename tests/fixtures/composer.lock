@@ -26,6 +26,13 @@
                 "dealerdirect/phpcodesniffer-composer-installer": "^0.7.0",
                 "drupal/coder": "^8.3"
             },
+            "extra": {
+                "patches": {
+                    "drupal/big_pipe_sessionless": {
+                        "Drupal 11 support (https://drupal.org/i/3428235)": "https://www.drupal.org/files/issues/2025-05-07/3428235.d11.patch"
+                    }
+                }
+            },
             "type": "drupal-custom-module",
             "license": [
                 "GPL-2.0-or-later"

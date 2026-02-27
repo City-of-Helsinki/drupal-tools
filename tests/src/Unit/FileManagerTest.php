@@ -7,6 +7,7 @@ namespace Drupal\Tests\helfi_drupal_tools\Unit;
 use DrupalTools\HttpFileManager;
 use DrupalTools\Update\FileManager;
 use DrupalTools\Update\UpdateOptions;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
@@ -25,9 +26,8 @@ class FileManagerTest extends TestCase {
 
   /**
    * Tests that updateFiles() work with ignoreFiles option.
-   *
-   * @dataProvider updateFilesIgnoreData
    */
+  #[DataProvider('updateFilesIgnoreData')]
   public function testUpdateFilesIgnore(array $ignoreFiles, array $files) : void {
     $filesystem = $this->prophesize(Filesystem::class);
     $client = $this->prophesize(HttpFileManager::class);
@@ -55,7 +55,7 @@ class FileManagerTest extends TestCase {
    * @return array[]
    *   The data.
    */
-  public function updateFilesIgnoreData() : array {
+  public static function updateFilesIgnoreData() : array {
     return [
       // Make sure files are ignored when ignoreFiles is not empty.
       [
@@ -124,9 +124,8 @@ class FileManagerTest extends TestCase {
 
   /**
    * Tests ignoreFiles option with addFiles().
-   *
-   * @dataProvider addFilesIgnoreFilesData
    */
+  #[DataProvider('addFilesIgnoreFilesData')]
   public function testAddFilesIgnoreFiles(array $ignoreFiles, array $files) : void {
     $client = $this->prophesize(HttpFileManager::class);
     $filesystem = $this->prophesize(Filesystem::class);
@@ -148,7 +147,7 @@ class FileManagerTest extends TestCase {
    * @return array[]
    *   The data.
    */
-  public function addFilesIgnoreFilesData() : array {
+  public static function addFilesIgnoreFilesData() : array {
     return [
       // Make sure files are ignored when ignoreFiles is not empty.
       [
@@ -256,9 +255,8 @@ class FileManagerTest extends TestCase {
 
   /**
    * Tests that removed files work with ignoreFiles option.
-   *
-   * @dataProvider removeIgnoreFilesData
    */
+  #[DataProvider('removeIgnoreFilesData')]
   public function testRemoveIgnoreFiles(array $ignoreFiles, array $files) : void {
     $client = $this->prophesize(HttpFileManager::class);
     $filesystem = $this->prophesize(Filesystem::class);
@@ -276,7 +274,7 @@ class FileManagerTest extends TestCase {
    * @return array[]
    *   The data.
    */
-  public function removeIgnoreFilesData() : array {
+  public static function removeIgnoreFilesData() : array {
     return [
       // Make sure files are ignored when ignoreFiles is not empty.
       [

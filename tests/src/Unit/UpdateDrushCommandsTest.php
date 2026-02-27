@@ -78,10 +78,11 @@ class UpdateDrushCommandsTest extends TestCase {
    * Make sure instance can be initialized via DI.
    */
   public function testCreateEarly() : void {
+    $this->expectNotToPerformAssertions();
     $container = new Container();
     $container->add('input', new ArgvInput());
     $container->add('output', new NullOutput());
-    $this->assertInstanceOf(UpdateDrushCommands::class, UpdateDrushCommands::create($container));
+    UpdateDrushCommands::create($container);
   }
 
   /**

@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.5/phpunit.xsd"
-         bootstrap="bootstrap.php"
          colors="true"
-         cacheResultFile=".phpunit.cache/test-results"
-         executionOrder="depends,defects"
-         forceCoversAnnotation="false"
+         bootstrap="bootstrap.php"
          beStrictAboutTestsThatDoNotTestAnything="true"
          beStrictAboutOutputDuringTests="true"
          beStrictAboutChangesToGlobalState="true"
-         beStrictAboutCoversAnnotation="false"
          failOnRisky="true"
          failOnWarning="true"
-         verbose="true">
+         displayDetailsOnTestsThatTriggerErrors="true"
+         displayDetailsOnTestsThatTriggerWarnings="true"
+         displayDetailsOnTestsThatTriggerDeprecations="true"
+         cacheResult="false"
+         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd"
+         cacheDirectory=".phpunit.cache">
   <php>
     <!-- Set error reporting to E_ALL. -->
     <ini name="error_reporting" value="32767"/>
@@ -30,14 +30,16 @@
       <directory>./src/Functional</directory>
     </testsuite>
   </testsuites>
-  <coverage cacheDirectory=".phpunit.cache/code-coverage" processUncoveredFiles="true">
+  <source ignoreSuppressionOfDeprecations="true">
     <include>
-      <directory suffix=".php">../src</directory>
+      <directory>../</directory>
     </include>
     <exclude>
       <file>../src/Drush/Commands/HelperDrushCommands.php</file>
-      <file>../src/Drush/Commands/OpenShiftDrushCommands.php</file>
+      <directory>../tests</directory>
     </exclude>
+  </source>
+  <coverage>
     <report>
       <clover outputFile="coverage.xml"/>
     </report>
