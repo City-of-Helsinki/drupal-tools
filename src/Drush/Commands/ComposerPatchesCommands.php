@@ -22,6 +22,7 @@ use Psr\Container\ContainerInterface;
 /**
  * A drush command to check composer patches.
  */
+#[Bootstrap(level: DrupalBootLevels::NONE)]
 final class ComposerPatchesCommands extends DrushCommands {
 
   use FormatterManagerTrait;
@@ -138,7 +139,6 @@ final class ComposerPatchesCommands extends DrushCommands {
    *   The result.
    */
   #[Command(name: 'helfi:tools:check-composer-patches')]
-  #[Bootstrap(level: DrupalBootLevels::NONE)]
   #[Argument(name: 'file', description: 'Path to composer.lock file')]
   #[FieldLabels(labels: [
     'package' => 'package',
