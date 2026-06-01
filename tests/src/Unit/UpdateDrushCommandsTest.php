@@ -8,6 +8,7 @@ use Drupal\Tests\helfi_api_base\Traits\ApiTestTrait;
 use DrupalTools\Drush\Commands\UpdateDrushCommands;
 use DrupalTools\Update\FileManager;
 use DrupalTools\Update\UpdateHookManager;
+use DrupalTools\Update\UpdateOptions;
 use Drush\Commands\DrushCommands;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Psr7\Response;
@@ -129,6 +130,41 @@ class UpdateDrushCommandsTest extends TestCase {
         'root' => '.',
       ]));
     $this->assertEquals(DrushCommands::EXIT_FAILURE_WITH_CLARITY, $return);
+  }
+
+  /**
+   * Tests that files are added and updated.
+   */
+  public function testUpdatePlatformAddsAndUpdatesFiles() : void {
+    $fs = $this->prophesize(Filesystem::class);
+    $fs->exists(Argument::containingString('.git'))
+      ->shouldBeCalled()
+      ->willReturn(TRUE);
+
+    $fileManager = $this->prophesize(FileManager::class);
+    $fileManager->updateFiles(Argument::type(UpdateOptions::class), Argument::type('array'))
+      ->shouldBeCalledTimes(2)
+      ->willReturn($fileManager->reveal());
+    $fileManager->addFiles(Argument::type(UpdateOptions::class), Argument::type('array'))
+      ->shouldBeCalledOnce()
+      ->willReturn($fileManager->reveal());
+
+    $output = $this->prophesize(OutputStyle::class);
+    $output->note('Running update hooks ...')->shouldBeCalled();
+    $output->note('Checking files ...')->shouldBeCalled();
+
+    $return = $this->getMockSut(
+      filesystem: $fs->reveal(),
+      fileManager: $fileManager->reveal(),
+      output: $output->reveal(),
+    )->updatePlatform(array_merge(UpdateDrushCommands::DEFAULT_OPTIONS, [
+      'root' => '.',
+      'self-update' => FALSE,
+      'run-migrations' => FALSE,
+      'ignore-files' => FALSE,
+    ]));
+
+    $this->assertEquals(DrushCommands::EXIT_SUCCESS, $return);
   }
 
 }
