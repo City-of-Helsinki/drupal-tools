@@ -51,7 +51,8 @@
             "phpstan/extension-installer": true,
             "php-http/discovery": false,
             "tbachert/spi": false,
-            "drupal/core-composer-scaffold": false
+            "drupal/core-composer-scaffold": false,
+            "symfony/runtime": false
         }
     },
     "extra": {
