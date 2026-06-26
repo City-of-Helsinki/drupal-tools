@@ -5,59 +5,56 @@ declare(strict_types=1);
 namespace DrupalTools\Drush\Commands;
 
 use Consolidation\AnnotatedCommand\CommandResult;
+use Consolidation\OutputFormatters\FormatterManager;
 use Consolidation\OutputFormatters\StructuredData\RowsOfFields;
-use DrupalTools\OutputFormatters\FormatterManagerTrait;
 use DrupalTools\Package\Exception\VersionCheckException;
-use Drush\Attributes\Argument;
 use Drush\Attributes\Bootstrap;
-use Drush\Attributes\Command;
 use Drush\Attributes\FieldLabels;
+use Drush\Attributes\Formatter;
 use Drush\Boot\DrupalBootLevels;
 use Drush\Commands\AutowireTrait;
 use Drush\Formatters\FormatterTrait;
-use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
-use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * A drush command to check composer patches.
+ * A Drush command to check composer patches.
  */
-#[Bootstrap(level: DrupalBootLevels::NONE)]
 #[AsCommand(
   name: 'helfi:tools:check-composer-patches',
   description: 'Checks whether Composer patches are installed correctly.',
 )]
-final class ComposerPatchesCommand extends \Symfony\Component\Console\Command\Command {
+#[Formatter(returnType: RowsOfFields::class, defaultFormatter: 'table')]
+#[FieldLabels(labels: [
+  'package' => 'package',
+  'description' => 'Patch description',
+  'patch' => 'Patch',
+])]
+#[Bootstrap(level: DrupalBootLevels::ROOT)]
+final class ComposerPatchesCommand extends Command {
 
   use AutowireTrait;
   use FormatterTrait;
 
   public function __construct(
     private readonly ClientInterface $client,
+    protected readonly FormatterManager $formatterManager,
   ) {
     parent::__construct();
-  }
-
-  protected function configure(): void {
-    $this
-      ->addArgument('file', InputArgument::REQUIRED, 'Path to composer.lock file');
   }
 
   /**
    * {@inheritdoc}
    */
-  /*public static function create(ContainerInterface $drush): self {
-    self::populateFormatterManager($drush);
-
-    return new self(
-      new Client(),
-    );
-  }*/
+  protected function configure(): void {
+    $this
+      ->addArgument('file', InputArgument::REQUIRED, 'Path to composer.lock file');
+  }
 
   /**
    * Checks if the patch is valid.
@@ -153,23 +150,37 @@ final class ComposerPatchesCommand extends \Symfony\Component\Console\Command\Co
    * @return int
    *   The exit code.
    */
-  #[Argument(name: 'file', description: 'Path to composer.lock file')]
-  #[FieldLabels(labels: [
-    'package' => 'package',
-    'description' => 'Patch description',
-    'patch' => 'Patch',
-  ])]
   public function execute(InputInterface $input, OutputInterface $output) : int {
-    $file = $input->getArgument('file');
+    $file = (string) $input->getArgument('file');
 
-    if (!realpath($file)) {
+    $result = $this->doExecute($file);
+    $this->writeFormattedOutput($input, $output, $result->getOutputData());
+
+    return $result->getExitCode();
+  }
+
+  /**
+   * The actual execute command.
+   *
+   * @param string $file
+   *   The composer.lock file.
+   *
+   * @return \Consolidation\AnnotatedCommand\CommandResult
+   *   The command result.
+   *
+   * @throws \JsonException
+   */
+  public function doExecute(string $file): CommandResult {
+    if (!realpath($file) || !file_exists($file)) {
       throw new VersionCheckException('Composer lock file not found');
     }
     $rows = $failed = [];
 
-    foreach ($this->getPatchedPackages($file) as $name => $patches) {
+    $packages = $this->getPatchedPackages($file);
+
+    foreach ($packages as $name => $patches) {
       $rows[] = [
-        'package' => $name,
+        'package' => '<info>' . $name . '</info>',
         'description' => '',
         'patch' => '',
       ];
@@ -192,18 +203,14 @@ final class ComposerPatchesCommand extends \Symfony\Component\Console\Command\Co
         if (!$this->isValidPatch($patch['patch'])) {
           $failed[] = $row;
         }
-
         $rows[] = $row;
       }
     }
 
     if ($failed) {
-      $this->writeFormattedOutput($input, $output, new RowsOfFields($failed));
-      return self::FAILURE;
+      return CommandResult::dataWithExitCode(new RowsOfFields($failed), self::FAILURE);
     }
-
-    $this->writeFormattedOutput($input, $output, new RowsOfFields($rows));
-    return self::SUCCESS;
+    return CommandResult::dataWithExitCode(new RowsOfFields($rows), self::SUCCESS);
   }
 
 }

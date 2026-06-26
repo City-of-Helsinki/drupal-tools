@@ -16,6 +16,8 @@ use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Tests Composer patches Drush commands.
@@ -27,14 +29,31 @@ class ComposerPatchesCommandsTest extends TestCase {
   use ApiTestTrait;
 
   /**
-   * Tests ::create().
+   * Gets the SUT.
+   *
+   * @param \GuzzleHttp\ClientInterface $client
+   *   The HTTP client.
+   *
+   * @return \DrupalTools\Drush\Commands\ComposerPatchesCommand
+   *   The SUT.
+   */
+  public function getSut(ClientInterface $client) : ComposerPatchesCommand {
+    $container = new Container();
+    $container->add(FormatterManager::class, new FormatterManager());
+    $container->add(ClientInterface::class, $client);
+    return ComposerPatchesCommand::create($container);
+  }
+
+  /**
+   * Tests empty composer.lock path.
    */
   #[Test]
-  public function testCreate(): void {
-    $this->expectNotToPerformAssertions();
-    $container = new Container();
-    $container->add('formatterManager', new FormatterManager());
-    ComposerPatchesCommand::create($container);
+  public function testEmptyPath(): void {
+    $this->expectException(VersionCheckException::class);
+    $client = $this->prophesize(ClientInterface::class)->reveal();
+    $sut = $this->getSut($client);
+    $input = $this->prophesize(InputInterface::class);
+    $sut->execute($input->reveal(), $this->prophesize(OutputInterface::class)->reveal());
   }
 
   /**
@@ -43,9 +62,12 @@ class ComposerPatchesCommandsTest extends TestCase {
   #[Test]
   public function testComposerLockFound(): void {
     $this->expectException(VersionCheckException::class);
-    $client = $this->prophesize(ClientInterface::class);
-    $sut = new ComposerPatchesCommand($client->reveal());
-    $sut->execute('nonexistent');
+    $client = $this->prophesize(ClientInterface::class)->reveal();
+    $sut = $this->getSut($client);
+    $input = $this->prophesize(InputInterface::class);
+    $input->getArgument('file')
+      ->willReturn('nonexistent');
+    $sut->execute($input->reveal(), $this->prophesize(OutputInterface::class)->reveal());
   }
 
   /**
@@ -55,8 +77,8 @@ class ComposerPatchesCommandsTest extends TestCase {
   public function testInvalidJson(): void {
     $this->expectException(\JsonException::class);
     $client = $this->prophesize(ClientInterface::class);
-    $sut = new ComposerPatchesCommand($client->reveal());
-    $sut->execute(__DIR__ . '/../../fixtures/invalid.lock');
+    $sut = $this->getSut($client->reveal());
+    $sut->doExecute(__DIR__ . '/../../fixtures/invalid.lock');
   }
 
   /**
@@ -67,14 +89,14 @@ class ComposerPatchesCommandsTest extends TestCase {
     $client = $this->createMockHttpClient([
       new Response(200),
     ]);
-    $sut = new ComposerPatchesCommand($client);
-    $result = $sut->execute(__DIR__ . '/../../fixtures/composer.lock');
-    $this->assertEquals(ComposerPatchesCommand::EXIT_SUCCESS, $result->getExitCode());
+    $sut = $this->getSut($client);
+    $result = $sut->doExecute(__DIR__ . '/../../fixtures/composer.lock');
+    $this->assertEquals(ComposerPatchesCommand::SUCCESS, $result->getExitCode());
     $this->assertInstanceOf(RowsOfFields::class, $result->getOutputData());
 
     $this->assertEquals([
       [
-        'package' => 'drupal/helfi_api_base',
+        'package' => '<info>drupal/helfi_api_base</info>',
         'description' => '',
         'patch' => '',
       ],
@@ -94,9 +116,9 @@ class ComposerPatchesCommandsTest extends TestCase {
     $client = $this->createMockHttpClient([
       new Response(404),
     ]);
-    $sut = new ComposerPatchesCommand($client);
-    $result = $sut->execute(__DIR__ . '/../../fixtures/composer.lock');
-    $this->assertEquals(ComposerPatchesCommand::EXIT_FAILURE_WITH_CLARITY, $result->getExitCode());
+    $sut = $this->getSut($client);
+    $result = $sut->doExecute(__DIR__ . '/../../fixtures/composer.lock');
+    $this->assertEquals(ComposerPatchesCommand::FAILURE, $result->getExitCode());
     $this->assertInstanceOf(RowsOfFields::class, $result->getOutputData());
 
     $this->assertEquals([
