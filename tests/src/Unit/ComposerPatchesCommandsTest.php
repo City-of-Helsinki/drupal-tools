@@ -7,7 +7,7 @@ namespace Drupal\Tests\helfi_drupal_tools\Unit;
 use Consolidation\OutputFormatters\FormatterManager;
 use Consolidation\OutputFormatters\StructuredData\RowsOfFields;
 use Drupal\Tests\helfi_api_base\Traits\ApiTestTrait;
-use DrupalTools\Drush\Commands\ComposerPatchesCommands;
+use DrupalTools\Drush\Commands\ComposerPatchesCommand;
 use DrupalTools\Package\Exception\VersionCheckException;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Psr7\Response;
@@ -34,7 +34,7 @@ class ComposerPatchesCommandsTest extends TestCase {
     $this->expectNotToPerformAssertions();
     $container = new Container();
     $container->add('formatterManager', new FormatterManager());
-    ComposerPatchesCommands::create($container);
+    ComposerPatchesCommand::create($container);
   }
 
   /**
@@ -44,7 +44,7 @@ class ComposerPatchesCommandsTest extends TestCase {
   public function testComposerLockFound(): void {
     $this->expectException(VersionCheckException::class);
     $client = $this->prophesize(ClientInterface::class);
-    $sut = new ComposerPatchesCommands($client->reveal());
+    $sut = new ComposerPatchesCommand($client->reveal());
     $sut->execute('nonexistent');
   }
 
@@ -55,7 +55,7 @@ class ComposerPatchesCommandsTest extends TestCase {
   public function testInvalidJson(): void {
     $this->expectException(\JsonException::class);
     $client = $this->prophesize(ClientInterface::class);
-    $sut = new ComposerPatchesCommands($client->reveal());
+    $sut = new ComposerPatchesCommand($client->reveal());
     $sut->execute(__DIR__ . '/../../fixtures/invalid.lock');
   }
 
@@ -67,9 +67,9 @@ class ComposerPatchesCommandsTest extends TestCase {
     $client = $this->createMockHttpClient([
       new Response(200),
     ]);
-    $sut = new ComposerPatchesCommands($client);
+    $sut = new ComposerPatchesCommand($client);
     $result = $sut->execute(__DIR__ . '/../../fixtures/composer.lock');
-    $this->assertEquals(ComposerPatchesCommands::EXIT_SUCCESS, $result->getExitCode());
+    $this->assertEquals(ComposerPatchesCommand::EXIT_SUCCESS, $result->getExitCode());
     $this->assertInstanceOf(RowsOfFields::class, $result->getOutputData());
 
     $this->assertEquals([
@@ -94,9 +94,9 @@ class ComposerPatchesCommandsTest extends TestCase {
     $client = $this->createMockHttpClient([
       new Response(404),
     ]);
-    $sut = new ComposerPatchesCommands($client);
+    $sut = new ComposerPatchesCommand($client);
     $result = $sut->execute(__DIR__ . '/../../fixtures/composer.lock');
-    $this->assertEquals(ComposerPatchesCommands::EXIT_FAILURE_WITH_CLARITY, $result->getExitCode());
+    $this->assertEquals(ComposerPatchesCommand::EXIT_FAILURE_WITH_CLARITY, $result->getExitCode());
     $this->assertInstanceOf(RowsOfFields::class, $result->getOutputData());
 
     $this->assertEquals([

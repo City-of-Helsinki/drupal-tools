@@ -13,19 +13,29 @@ use Drush\Attributes\Bootstrap;
 use Drush\Attributes\Command;
 use Drush\Attributes\FieldLabels;
 use Drush\Boot\DrupalBootLevels;
-use Drush\Commands\DrushCommands;
+use Drush\Commands\AutowireTrait;
+use Drush\Formatters\FormatterTrait;
 use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
 use Psr\Container\ContainerInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * A drush command to check composer patches.
  */
 #[Bootstrap(level: DrupalBootLevels::NONE)]
-final class ComposerPatchesCommands extends DrushCommands {
+#[AsCommand(
+  name: 'helfi:tools:check-composer-patches',
+  description: 'Checks whether Composer patches are installed correctly.',
+)]
+final class ComposerPatchesCommand extends \Symfony\Component\Console\Command\Command {
 
-  use FormatterManagerTrait;
+  use AutowireTrait;
+  use FormatterTrait;
 
   public function __construct(
     private readonly ClientInterface $client,
@@ -33,16 +43,21 @@ final class ComposerPatchesCommands extends DrushCommands {
     parent::__construct();
   }
 
+  protected function configure(): void {
+    $this
+      ->addArgument('file', InputArgument::REQUIRED, 'Path to composer.lock file');
+  }
+
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $drush): self {
+  /*public static function create(ContainerInterface $drush): self {
     self::populateFormatterManager($drush);
 
     return new self(
       new Client(),
     );
-  }
+  }*/
 
   /**
    * Checks if the patch is valid.
@@ -130,22 +145,23 @@ final class ComposerPatchesCommands extends DrushCommands {
   /**
    * Checks whether Composer patches are installed correctly.
    *
-   * @param string $file
-   *   The path to 'composer.lock' file.
-   * @param array $options
-   *   The options.
+   * @param \Symfony\Component\Console\Input\InputInterface $input
+   *   The input.
+   * @param \Symfony\Component\Console\Output\OutputInterface $output
+   *   The output.
    *
-   * @return \Consolidation\AnnotatedCommand\CommandResult
-   *   The result.
+   * @return int
+   *   The exit code.
    */
-  #[Command(name: 'helfi:tools:check-composer-patches')]
   #[Argument(name: 'file', description: 'Path to composer.lock file')]
   #[FieldLabels(labels: [
     'package' => 'package',
     'description' => 'Patch description',
     'patch' => 'Patch',
   ])]
-  public function execute(string $file, array $options = ['format' => 'table']) : CommandResult {
+  public function execute(InputInterface $input, OutputInterface $output) : int {
+    $file = $input->getArgument('file');
+
     if (!realpath($file)) {
       throw new VersionCheckException('Composer lock file not found');
     }
@@ -182,10 +198,12 @@ final class ComposerPatchesCommands extends DrushCommands {
     }
 
     if ($failed) {
-      return CommandResult::dataWithExitCode(new RowsOfFields($failed), self::EXIT_FAILURE_WITH_CLARITY);
+      $this->writeFormattedOutput($input, $output, new RowsOfFields($failed));
+      return self::FAILURE;
     }
 
-    return CommandResult::dataWithExitCode(new RowsOfFields($rows), self::EXIT_SUCCESS);
+    $this->writeFormattedOutput($input, $output, new RowsOfFields($rows));
+    return self::SUCCESS;
   }
 
 }
