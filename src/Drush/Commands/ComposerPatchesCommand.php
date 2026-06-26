@@ -5,30 +5,45 @@ declare(strict_types=1);
 namespace DrupalTools\Drush\Commands;
 
 use Consolidation\AnnotatedCommand\CommandResult;
+use Consolidation\OutputFormatters\FormatterManager;
 use Consolidation\OutputFormatters\StructuredData\RowsOfFields;
-use DrupalTools\OutputFormatters\FormatterManagerTrait;
 use DrupalTools\Package\Exception\VersionCheckException;
-use Drush\Attributes\Argument;
 use Drush\Attributes\Bootstrap;
-use Drush\Attributes\Command;
 use Drush\Attributes\FieldLabels;
+use Drush\Attributes\Formatter;
 use Drush\Boot\DrupalBootLevels;
-use Drush\Commands\DrushCommands;
-use GuzzleHttp\Client;
+use Drush\Commands\AutowireTrait;
+use Drush\Formatters\FormatterTrait;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
-use Psr\Container\ContainerInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * A drush command to check composer patches.
+ * A Drush command to check composer patches.
  */
-#[Bootstrap(level: DrupalBootLevels::NONE)]
-final class ComposerPatchesCommands extends DrushCommands {
+#[AsCommand(
+  name: 'helfi:tools:check-composer-patches',
+  description: 'Checks whether Composer patches are installed correctly.',
+)]
+#[Formatter(returnType: RowsOfFields::class, defaultFormatter: 'table')]
+#[FieldLabels(labels: [
+  'package' => 'package',
+  'description' => 'Patch description',
+  'patch' => 'Patch',
+])]
+#[Bootstrap(level: DrupalBootLevels::ROOT)]
+final class ComposerPatchesCommand extends Command {
 
-  use FormatterManagerTrait;
+  use AutowireTrait;
+  use FormatterTrait;
 
   public function __construct(
     private readonly ClientInterface $client,
+    protected readonly FormatterManager $formatterManager,
   ) {
     parent::__construct();
   }
@@ -36,12 +51,9 @@ final class ComposerPatchesCommands extends DrushCommands {
   /**
    * {@inheritdoc}
    */
-  public static function create(ContainerInterface $drush): self {
-    self::populateFormatterManager($drush);
-
-    return new self(
-      new Client(),
-    );
+  protected function configure(): void {
+    $this
+      ->addArgument('file', InputArgument::REQUIRED, 'Path to composer.lock file');
   }
 
   /**
@@ -130,30 +142,45 @@ final class ComposerPatchesCommands extends DrushCommands {
   /**
    * Checks whether Composer patches are installed correctly.
    *
+   * @param \Symfony\Component\Console\Input\InputInterface $input
+   *   The input.
+   * @param \Symfony\Component\Console\Output\OutputInterface $output
+   *   The output.
+   *
+   * @return int
+   *   The exit code.
+   */
+  public function execute(InputInterface $input, OutputInterface $output) : int {
+    $file = (string) $input->getArgument('file');
+
+    $result = $this->doExecute($file);
+    $this->writeFormattedOutput($input, $output, $result->getOutputData());
+
+    return $result->getExitCode();
+  }
+
+  /**
+   * The actual execute command.
+   *
    * @param string $file
-   *   The path to 'composer.lock' file.
-   * @param array $options
-   *   The options.
+   *   The composer.lock file.
    *
    * @return \Consolidation\AnnotatedCommand\CommandResult
-   *   The result.
+   *   The command result.
+   *
+   * @throws \JsonException
    */
-  #[Command(name: 'helfi:tools:check-composer-patches')]
-  #[Argument(name: 'file', description: 'Path to composer.lock file')]
-  #[FieldLabels(labels: [
-    'package' => 'package',
-    'description' => 'Patch description',
-    'patch' => 'Patch',
-  ])]
-  public function execute(string $file, array $options = ['format' => 'table']) : CommandResult {
-    if (!realpath($file)) {
+  public function doExecute(string $file): CommandResult {
+    if (!realpath($file) || !file_exists($file)) {
       throw new VersionCheckException('Composer lock file not found');
     }
     $rows = $failed = [];
 
-    foreach ($this->getPatchedPackages($file) as $name => $patches) {
+    $packages = $this->getPatchedPackages($file);
+
+    foreach ($packages as $name => $patches) {
       $rows[] = [
-        'package' => $name,
+        'package' => '<info>' . $name . '</info>',
         'description' => '',
         'patch' => '',
       ];
@@ -176,16 +203,14 @@ final class ComposerPatchesCommands extends DrushCommands {
         if (!$this->isValidPatch($patch['patch'])) {
           $failed[] = $row;
         }
-
         $rows[] = $row;
       }
     }
 
     if ($failed) {
-      return CommandResult::dataWithExitCode(new RowsOfFields($failed), self::EXIT_FAILURE_WITH_CLARITY);
+      return CommandResult::dataWithExitCode(new RowsOfFields($failed), self::FAILURE);
     }
-
-    return CommandResult::dataWithExitCode(new RowsOfFields($rows), self::EXIT_SUCCESS);
+    return CommandResult::dataWithExitCode(new RowsOfFields($rows), self::SUCCESS);
   }
 
 }
