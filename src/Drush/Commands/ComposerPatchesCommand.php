@@ -7,6 +7,7 @@ namespace DrupalTools\Drush\Commands;
 use Consolidation\AnnotatedCommand\CommandResult;
 use Consolidation\OutputFormatters\FormatterManager;
 use Consolidation\OutputFormatters\StructuredData\RowsOfFields;
+use DrupalTools\OutputFormatters\FormatterManagerTrait;
 use DrupalTools\Package\Exception\VersionCheckException;
 use Drush\Attributes\Bootstrap;
 use Drush\Attributes\FieldLabels;
@@ -14,6 +15,7 @@ use Drush\Attributes\Formatter;
 use Drush\Boot\DrupalBootLevels;
 use Drush\Commands\AutowireTrait;
 use Drush\Formatters\FormatterTrait;
+use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -35,16 +37,19 @@ use Symfony\Component\Console\Output\OutputInterface;
   'description' => 'Patch description',
   'patch' => 'Patch',
 ])]
-#[Bootstrap(level: DrupalBootLevels::ROOT)]
+#[Bootstrap(level: DrupalBootLevels::NONE)]
 final class ComposerPatchesCommand extends Command {
 
   use AutowireTrait;
   use FormatterTrait;
+  use FormatterManagerTrait;
 
   public function __construct(
-    private readonly ClientInterface $client,
     protected readonly FormatterManager $formatterManager,
+    private readonly ClientInterface $client = new Client(),
   ) {
+    $this->populateFormatterManager();
+
     parent::__construct();
   }
 
@@ -71,10 +76,8 @@ final class ComposerPatchesCommand extends Command {
       './patches/',
     ];
 
-    foreach ($validDirectories as $directory) {
-      if (str_starts_with($patch, $directory)) {
-        return TRUE;
-      }
+    if (array_any($validDirectories, fn($directory) => str_starts_with($patch, $directory))) {
+      return TRUE;
     }
 
     // Support old Drupal.org patch workflow.

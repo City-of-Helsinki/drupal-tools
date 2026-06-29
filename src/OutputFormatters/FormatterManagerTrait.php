@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace DrupalTools\OutputFormatters;
 
 use Consolidation\OutputFormatters\FormatterManager;
-use Psr\Container\ContainerInterface;
 
 /**
  * A trait to manage custom formatters.
@@ -13,22 +12,19 @@ use Psr\Container\ContainerInterface;
 trait FormatterManagerTrait {
 
   /**
-   * Populates required formatter managers.
+   * The formatter manager.
    *
-   * @param \Psr\Container\ContainerInterface $drush
-   *   The drush container.
+   * @var \Consolidation\OutputFormatters\FormatterManager
    */
-  public static function populateFormatterManager(ContainerInterface $drush): void {
-    /** @var \Consolidation\OutputFormatters\FormatterManager $formatterManager */
-    $formatterManager = $drush->get('formatterManager');
+  protected readonly FormatterManager $formatterManager;
 
-    if (!$formatterManager instanceof FormatterManager) {
-      throw new \LogicException('Formatter manager is not set.');
-    }
-
-    // @todo Figure out if there's a better way to inject this service.
-    if (!$formatterManager->hasFormatter('markdown_table')) {
-      $formatterManager->addFormatter('markdown_table', new MarkdownTableFormatter());
+  /**
+   * Populates required formatter managers.
+   */
+  public function populateFormatterManager(): void {
+    // @todo Refactor this to use Symfony Listeners once Drush supports psr-4 listeners.
+    if (!$this->formatterManager->hasFormatter('markdown_table')) {
+      $this->formatterManager->addFormatter('markdown_table', new MarkdownTableFormatter());
     }
   }
 
