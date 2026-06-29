@@ -4,19 +4,20 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\helfi_drupal_tools\Kernel;
 
+use Consolidation\OutputFormatters\FormatterManager;
 use Consolidation\OutputFormatters\StructuredData\RowsOfFields;
 use Drupal\KernelTests\KernelTestBase;
 use DrupalTools\Drush\Commands\PackageScannerDrushCommands;
 use DrupalTools\OutputFormatters\MarkdownTableFormatter;
 use DrupalTools\Package\ComposerOutdatedProcess;
 use DrupalTools\Package\VersionChecker;
-use Drush\Commands\DrushCommands;
 use Drush\Formatters\DrushFormatterManager;
 use League\Container\Container;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Psr\Container\ContainerInterface;
+use Symfony\Component\Console\Command\Command;
 
 /**
  * Tests Package version checker commands.
@@ -36,7 +37,7 @@ final class CheckPackageVersionsCommandsTest extends KernelTestBase {
    */
   private function getDrushContainer() : ContainerInterface {
     $container = new Container();
-    $container->add('formatterManager', new DrushFormatterManager());
+    $container->add(FormatterManager::class, new DrushFormatterManager());
     return $container;
   }
 
@@ -46,7 +47,7 @@ final class CheckPackageVersionsCommandsTest extends KernelTestBase {
   public function testMarkdownTableFormatter() : void {
     $container = $this->getDrushContainer();
     PackageScannerDrushCommands::create($container);
-    $this->assertInstanceOf(MarkdownTableFormatter::class, $container->get('formatterManager')->getFormatter('markdown_table'));
+    $this->assertInstanceOf(MarkdownTableFormatter::class, $container->get(FormatterManager::class)->getFormatter('markdown_table'));
   }
 
   /**
@@ -67,15 +68,15 @@ final class CheckPackageVersionsCommandsTest extends KernelTestBase {
         ],
       ]);
     $versionChecker = new VersionChecker($process->reveal());
-    $sut = new PackageScannerDrushCommands($versionChecker);
+    $sut = new PackageScannerDrushCommands(new FormatterManager(), $versionChecker);
 
     // Test with up-to-date version and make sure we exit with success.
-    $return = $sut->checkVersions(__DIR__ . '/../../fixtures/composer.lock');
-    $this->assertEquals(DrushCommands::EXIT_SUCCESS, $return->getExitCode());
+    $return = $sut->doExecute(__DIR__ . '/../../fixtures/composer.lock');
+    $this->assertEquals(Command::SUCCESS, $return->getExitCode());
 
     // Test with old version and make sure we exit with failure.
-    $return = $sut->checkVersions(__DIR__ . '/../../fixtures/composer.lock');
-    $this->assertEquals(DrushCommands::EXIT_FAILURE_WITH_CLARITY, $return->getExitCode());
+    $return = $sut->doExecute(__DIR__ . '/../../fixtures/composer.lock');
+    $this->assertEquals(Command::FAILURE, $return->getExitCode());
     $rows = $return->getOutputData();
     $this->assertInstanceOf(RowsOfFields::class, $rows);
     $this->assertEquals([
