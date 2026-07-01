@@ -219,6 +219,7 @@ final class UpdateDrushCommands extends DrushCommands {
         'docker/openshift/hooks/deploy/10-preflight.sh',
         'docker/openshift/hooks/deploy/20-deploy.sh',
         'docker/openshift/hooks/db-replace/10-prepare.sh',
+        'docker/openshift/hooks/db-replace/20-sitemap.sh',
         'docker/openshift/hooks/db-replace/50-sanitize.sh',
         'docker/openshift/hooks/db-replace/90-translations.sh',
         'docker/openshift/preflight/preflight.php',
