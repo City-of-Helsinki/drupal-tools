@@ -112,7 +112,7 @@ function drupal_tools_update_25(UpdateOptions $options, FileManager $fileManager
 /**
  * UHF-13425: Allow symfony/runtime to run composer scripts.
  */
-function drupal_tools_update_14() : UpdateResult {
+function drupal_tools_update_26() : UpdateResult {
   (new Process([
     'composer', 'config', 'allow-plugins.symfony/runtime', 'true', '--no-interaction',
   ]))
