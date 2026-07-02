@@ -108,7 +108,6 @@ function drupal_tools_update_25(UpdateOptions $options, FileManager $fileManager
   ]);
 }
 
-
 /**
  * UHF-13425: Allow symfony/runtime to run composer scripts.
  */
