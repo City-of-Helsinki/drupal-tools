@@ -107,3 +107,18 @@ function drupal_tools_update_25(UpdateOptions $options, FileManager $fileManager
     'Removed unused phpunit.platform.xml file.',
   ]);
 }
+
+
+/**
+ * UHF-13425: Allow symfony/runtime to run composer scripts.
+ */
+function drupal_tools_update_14() : UpdateResult {
+  (new Process([
+    'composer', 'config', 'allow-plugins.symfony/runtime', 'true', '--no-interaction',
+  ]))
+    ->run();
+
+  return new UpdateResult([
+    'Added symfony/runtime to allow-plugins',
+  ]);
+}
