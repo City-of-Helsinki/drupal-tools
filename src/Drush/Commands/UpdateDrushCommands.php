@@ -216,6 +216,7 @@ final class UpdateDrushCommands extends DrushCommands {
         'docker/openshift/crons/cron.sh',
         'docker/openshift/crons/revision-queue.sh',
         'docker/openshift/crons/menu-queue.sh',
+        'docker/openshift/crons/embedding-queue.sh',
         'docker/openshift/hooks/deploy/10-preflight.sh',
         'docker/openshift/hooks/deploy/20-deploy.sh',
         'docker/openshift/hooks/db-replace/10-prepare.sh',
