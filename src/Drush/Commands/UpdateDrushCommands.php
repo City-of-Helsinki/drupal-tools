@@ -237,6 +237,7 @@ final class UpdateDrushCommands extends DrushCommands {
         'tools/make/qa.mk',
         'tools/make/theme.mk',
         'tools/commit-msg',
+        'tools/composer/require-container.sh',
         '.sonarcloud.properties',
         '.github/pull_request_template.md',
         '.deprecation-ignore.txt',

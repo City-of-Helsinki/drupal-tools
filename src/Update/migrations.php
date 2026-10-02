@@ -121,3 +121,29 @@ function drupal_tools_update_26() : UpdateResult {
     'Added symfony/runtime to allow-plugins',
   ]);
 }
+
+/**
+ * Prevent Composer from running outside of the container.
+ */
+function drupal_tools_update_27(UpdateOptions $options, FileManager $fileManager) : UpdateResult {
+  $script = 'tools/composer/require-container.sh';
+
+  // The update hooks run before the default files are updated, so fetch the
+  // script first: Composer can't run any commands if the script is missing.
+  $fileManager->updateFiles($options, [$script]);
+
+  if (!file_exists($script)) {
+    return new UpdateResult([
+      sprintf('Skipped the pre-command-run script, since %s is ignored.', $script),
+    ]);
+  }
+
+  (new Process([
+    'composer', 'config', '--no-plugins', 'scripts.pre-command-run', 'bash ' . $script, '--no-interaction',
+  ]))
+    ->run();
+
+  return new UpdateResult([
+    'Added a pre-command-run script that prevents Composer from running outside of the container.',
+  ]);
+}
