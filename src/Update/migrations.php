@@ -159,7 +159,7 @@ function drupal_tools_update_27(UpdateOptions $options, FileManager $fileManager
  * We're not affected by the vulnerabilities, since the SVG support is
  * disabled: imagecache_external never passes any SVG files to the sanitizer.
  *
- * @see https://www.drupal.org/project/imagecache_external
+ * @see https://git.drupalcode.org/project/imagecache_external/-/work_items/3599127
  */
 function drupal_tools_update_28() : UpdateResult {
   $advisories = [
