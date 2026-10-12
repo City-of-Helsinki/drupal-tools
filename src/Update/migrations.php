@@ -147,3 +147,49 @@ function drupal_tools_update_27(UpdateOptions $options, FileManager $fileManager
     'Added a pre-command-run script that prevents Composer from running outside of the container.',
   ]);
 }
+
+/**
+ * Ignore enshrined/svg-sanitize 0.22 security advisories.
+ *
+ * Composer blocks package versions that are affected by security advisories,
+ * so drupal/imagecache_external is silently downgraded to 3.0.5, since newer
+ * versions require enshrined/svg-sanitize ~0.22. The advisories are fixed in
+ * enshrined/svg-sanitize 1.0.
+ *
+ * We're not affected by the vulnerabilities, since the SVG support is
+ * disabled: imagecache_external never passes any SVG files to the sanitizer.
+ *
+ * @see https://git.drupalcode.org/project/imagecache_external/-/work_items/3599127
+ */
+function drupal_tools_update_28() : UpdateResult {
+  $advisories = [
+    // CVE-2026-107380.
+    'GHSA-9rjx-3jch-6vjf',
+    // CVE-2026-107379.
+    'GHSA-v383-3rw5-q8rf',
+    // CVE-2026-107381.
+    'GHSA-m9xh-6747-9r6f',
+    'GHSA-qhmf-972w-m957',
+  ];
+
+  $composer = json_decode((string) file_get_contents('composer.json'), TRUE);
+  $ignore = $composer['config']['audit']['ignore'] ?? [];
+
+  if (array_is_list($ignore)) {
+    $ignore = array_values(array_unique([...$ignore, ...$advisories]));
+  }
+  else {
+    foreach ($advisories as $id) {
+      $ignore[$id] ??= 'Not affected: imagecache_external SVG support is disabled.';
+    }
+  }
+
+  (new Process([
+    'composer', 'config', '--json', 'audit.ignore', json_encode($ignore), '--no-interaction',
+  ]))
+    ->mustRun();
+
+  return new UpdateResult([
+    'Added enshrined/svg-sanitize security advisories to composer audit.ignore.',
+  ]);
+}
