@@ -13,6 +13,7 @@ use Drush\Commands\DrushCommands;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Psr7\Response;
 use League\Container\Container;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
@@ -25,9 +26,8 @@ use Symfony\Component\Filesystem\Filesystem;
  * Tests Update drush commands.
  *
  * @todo Improve these.
- *
- * @group helfi_drupal_tools
  */
+#[Group('helfi_drupal_tools')]
 class UpdateDrushCommandsTest extends TestCase {
 
   use ProphecyTrait;

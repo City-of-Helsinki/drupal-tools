@@ -12,14 +12,14 @@ use Consolidation\OutputFormatters\StructuredData\RowsOfFields;
 use Consolidation\OutputFormatters\StructuredData\UnstructuredData;
 use DrupalTools\OutputFormatters\MarkdownTableFormatter;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Output\BufferedOutput;
 
 /**
  * Tests Markdown table formatter.
- *
- * @group helfi_drupal_tools
  */
+#[Group('helfi_drupal_tools')]
 class MarkdownTableFormatterTest extends TestCase {
 
   /**

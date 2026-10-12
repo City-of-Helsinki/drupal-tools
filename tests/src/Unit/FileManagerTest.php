@@ -8,6 +8,7 @@ use DrupalTools\HttpFileManager;
 use DrupalTools\Update\FileManager;
 use DrupalTools\Update\UpdateOptions;
 use PHPUnit\Framework\Attributes\DataProvider;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
@@ -17,9 +18,8 @@ use Symfony\Component\Filesystem\Filesystem;
 
 /**
  * Tests file manager.
- *
- * @group helfi_drupal_tools
  */
+#[Group('helfi_drupal_tools')]
 class FileManagerTest extends TestCase {
 
   use ProphecyTrait;

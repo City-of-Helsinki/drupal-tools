@@ -7,15 +7,15 @@ namespace Drupal\Tests\helfi_drupal_tools\Unit;
 use DrupalTools\Update\FileManager;
 use DrupalTools\Update\UpdateHookManager;
 use DrupalTools\Update\UpdateOptions;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\Filesystem\Filesystem;
 
 /**
  * Tests update manager.
- *
- * @group helfi_drupal_tools
  */
+#[Group('helfi_drupal_tools')]
 class UpdateManagerTest extends TestCase {
 
   use ProphecyTrait;

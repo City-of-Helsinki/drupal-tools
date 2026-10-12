@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace Drupal\Tests\helfi_drupal_tools\Unit\Package;
 
+use Drupal\Tests\UnitTestCase;
 use DrupalTools\Package\ComposerOutdatedProcess;
 use DrupalTools\Package\Exception\VersionCheckException;
 use DrupalTools\Package\Version;
 use DrupalTools\Package\VersionChecker;
-use Drupal\Tests\UnitTestCase;
+use PHPUnit\Framework\Attributes\Group;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 
 /**
  * Tests Version checker.
- *
- * @group helfi_api_base
  */
+#[Group('helfi_drupal_tools')]
 class VersionCheckerTest extends UnitTestCase {
 
   use ProphecyTrait;

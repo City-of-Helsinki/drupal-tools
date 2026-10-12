@@ -10,13 +10,13 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\TestCase;
 
 /**
  * Tests http file manager.
- *
- * @group helfi_drupal_tools
  */
+#[Group('helfi_drupal_tools')]
 class HttpFileManagerTest extends TestCase {
 
   /**

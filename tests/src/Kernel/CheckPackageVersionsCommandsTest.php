@@ -13,6 +13,7 @@ use DrupalTools\Package\ComposerOutdatedProcess;
 use DrupalTools\Package\VersionChecker;
 use Drush\Formatters\DrushFormatterManager;
 use League\Container\Container;
+use PHPUnit\Framework\Attributes\Group;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use Prophecy\Argument;
 use Prophecy\PhpUnit\ProphecyTrait;
@@ -21,9 +22,8 @@ use Symfony\Component\Console\Command\Command;
 
 /**
  * Tests Package version checker commands.
- *
- * @group helfi_drupal_tools
  */
+#[Group('helfi_drupal_tools')]
 #[RunTestsInSeparateProcesses]
 final class CheckPackageVersionsCommandsTest extends KernelTestBase {
 
