@@ -227,7 +227,10 @@ function drupal_tools_update_29() : UpdateResult {
   // Allow subthemes without JavaScript files.
   $scripts = str_replace(
     ['sandbox biome lint src/js/', 'sandbox biome format --write src/js/'],
-    ['sandbox biome lint --no-errors-on-unmatched src/js/', 'sandbox biome format --write --no-errors-on-unmatched src/js/'],
+    [
+      'sandbox biome lint --no-errors-on-unmatched src/js/',
+      'sandbox biome format --write --no-errors-on-unmatched src/js/',
+    ],
     $scripts,
   );
   $package->scripts = (object) $scripts;
