@@ -193,3 +193,91 @@ function drupal_tools_update_28() : UpdateResult {
     'Added enshrined/svg-sanitize security advisories to composer audit.ignore.',
   ]);
 }
+
+/**
+ * UHF-13657: Use the hdbt theme builder in hdbt_subtheme.
+ */
+function drupal_tools_update_29() : UpdateResult {
+  $theme = 'public/themes/custom/hdbt_subtheme';
+  $file = $theme . '/package.json';
+  $builder = $theme . '/theme-builder.mjs';
+
+  if (!file_exists($file) || !file_exists($builder)) {
+    return new UpdateResult(['Skipped, hdbt_subtheme does not use the theme builder.']);
+  }
+  $package = json_decode((string) file_get_contents($file));
+
+  // Import Node built-in modules with the node prefix.
+  $config = (string) file_get_contents($builder);
+  $updated = str_replace(
+    [
+      "import path from 'path';",
+      "import { globSync } from 'glob';",
+      '// ignore: [],',
+    ],
+    [
+      "import path from 'node:path';",
+      "import { globSync } from 'node:fs';",
+      '// exclude: [],',
+    ],
+    $config,
+  );
+  if ($updated !== $config) {
+    file_put_contents($builder, $updated);
+  }
+
+  // Refresh the theme builder from hdbt on every install.
+  $scripts = ['preinstall' => 'rm -rf node_modules/@hdbt/theme-builder && npm install ../../contrib/hdbt/theme-builder --loglevel=silent'];
+  foreach ($package->scripts as $name => $script) {
+    $scripts[$name] ??= str_replace('../../contrib/hdbt/tools/sandbox.sh', 'sandbox', $script);
+  }
+
+  // Allow subthemes without JavaScript files.
+  $scripts = str_replace(
+    ['sandbox biome lint src/js/', 'sandbox biome format --write src/js/'],
+    [
+      'sandbox biome lint --no-errors-on-unmatched src/js/',
+      'sandbox biome format --write --no-errors-on-unmatched src/js/',
+    ],
+    $scripts,
+  );
+  $package->scripts = (object) $scripts;
+
+  if (isset($package->{'@comment scripts'})) {
+    $package->{'@comment scripts'} = str_replace('the hdbt sandbox script', 'the sandbox command', $package->{'@comment scripts'});
+  }
+  $package->scripts->{'lint:scss'} = 'sandbox stylelint "src/scss/**/*.scss" --config node_modules/@hdbt/theme-builder/.stylelintrc.yaml --formatter string --fix';
+  unset($package->scripts->{'lint:stylelint'});
+
+  // Keep the hdbt install for React apps.
+  if (!file_exists($theme . '/tsconfig.json')) {
+    unset($package->scripts->postinstall);
+  }
+
+  $package->dependencies ??= new \stdClass();
+
+  // Remove the packages the theme builder provides.
+  foreach (['@biomejs/biome', 'breakpoint-sass', 'hds-design-tokens'] as $name) {
+    unset($package->dependencies->{$name});
+  }
+  if (!str_contains($updated, "from 'glob'")) {
+    unset($package->dependencies->glob);
+  }
+  $package->dependencies->{'@hdbt/theme-builder'} = 'file:../../contrib/hdbt/theme-builder';
+
+  $package->overrides ??= new \stdClass();
+  $package->overrides->{'svg-sprite'} = (object) ['glob' => '^13.0.0'];
+
+  $package->allowScripts ??= new \stdClass();
+  $package->allowScripts->esbuild ??= FALSE;
+  $package->allowScripts->{'@parcel/watcher'} ??= FALSE;
+
+  $json = json_encode($package, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+  // Indent with two spaces like npm.
+  $json = preg_replace_callback('/^(?: {4})+/m', fn (array $matches) => str_repeat('  ', strlen($matches[0]) / 4), $json);
+  file_put_contents($file, $json . "\n");
+
+  return new UpdateResult([
+    'Updated hdbt_subtheme package.json and theme-builder.mjs to use the hdbt theme builder.',
+  ]);
+}

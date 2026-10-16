@@ -201,6 +201,9 @@ final class UpdateDrushCommands extends DrushCommands {
       ->updateFiles($options, [
         'public/sites/default/azure.settings.php',
         'public/sites/default/settings.php',
+        'public/themes/custom/hdbt_subtheme/.npmrc',
+        'public/themes/custom/hdbt_subtheme/.nvmrc',
+        'public/themes/custom/hdbt_subtheme/biome.json',
         'docker/elastic-proxy/elastic.conf',
         'docker/elastic-proxy/nginx.conf',
         'docker/openshift/Dockerfile',
