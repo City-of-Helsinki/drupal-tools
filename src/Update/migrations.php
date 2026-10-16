@@ -207,11 +207,19 @@ function drupal_tools_update_29() : UpdateResult {
   }
   $package = json_decode((string) file_get_contents($file));
 
-  // Use the Node glob instead of the glob package.
+  // Import Node built-in modules with the node prefix.
   $config = (string) file_get_contents($builder);
   $updated = str_replace(
-    ["import { globSync } from 'glob';", '// ignore: [],'],
-    ["import { globSync } from 'node:fs';", '// exclude: [],'],
+    [
+      "import path from 'path';",
+      "import { globSync } from 'glob';",
+      '// ignore: [],',
+    ],
+    [
+      "import path from 'node:path';",
+      "import { globSync } from 'node:fs';",
+      '// exclude: [],',
+    ],
     $config,
   );
   if ($updated !== $config) {
