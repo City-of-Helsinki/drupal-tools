@@ -211,7 +211,7 @@ function drupal_tools_update_29() : UpdateResult {
   $config = (string) file_get_contents($builder);
   $updated = str_replace(
     ["import { globSync } from 'glob';", '// ignore: [],'],
-    ["import { globSync } from 'fs';", '// exclude: [],'],
+    ["import { globSync } from 'node:fs';", '// exclude: [],'],
     $config,
   );
   if ($updated !== $config) {
