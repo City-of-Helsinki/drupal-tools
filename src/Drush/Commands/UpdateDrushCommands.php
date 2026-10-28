@@ -241,6 +241,7 @@ final class UpdateDrushCommands extends DrushCommands {
         'tools/make/git.mk',
         'tools/make/qa.mk',
         'tools/make/theme.mk',
+        'tools/make/sync-local-settings.sh',
         'tools/commit-msg',
         'tools/composer/require-container.sh',
         '.sonarcloud.properties',
