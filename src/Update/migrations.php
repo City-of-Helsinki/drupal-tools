@@ -281,3 +281,60 @@ function drupal_tools_update_29() : UpdateResult {
     'Updated hdbt_subtheme package.json and theme-builder.mjs to use the hdbt theme builder.',
   ]);
 }
+
+/**
+ * Hold back new package releases with the Composer cooldown policy.
+ *
+ * A compromised release is usually found and removed within a few days, so
+ * Composer installs new releases only after the cooldown period. Our own
+ * packages are exempt, since they are rolled out by the automatic update
+ * workflow. The workflow updates packages with security advisories without
+ * the cooldown.
+ *
+ * Our Satis repository has no publication times, so Composer falls back to
+ * the release time of each package.
+ *
+ * @see https://getcomposer.org/doc/06-config.md#policy
+ */
+function drupal_tools_update_30() : UpdateResult {
+  $messages = [];
+
+  // Composer can't change a repository in the list format, so add the
+  // setting after the URL. This keeps the formatting of composer.json.
+  $file = (string) file_get_contents('composer.json');
+  $updated = preg_replace_callback(
+    '#^(\s*)("url":\s*"https://repository\.drupal\.hel\.ninja/?")(,?)$#m',
+    fn (array $matches) => sprintf("%s%s,\n%s\"require-published-time\": false%s", $matches[1], $matches[2], $matches[1], $matches[3]),
+    $file,
+    1,
+  );
+
+  if ($updated !== $file && !str_contains($file, '"require-published-time"') && json_decode((string) $updated) !== NULL) {
+    file_put_contents('composer.json', $updated);
+    $messages[] = 'Composer falls back to the release time of packages from repository.drupal.hel.ninja.';
+  }
+
+  $composer = json_decode((string) file_get_contents('composer.json'), TRUE);
+
+  // Keep the cooldown policy of projects that already configure it.
+  if (!isset($composer['config']['policy']['cooldown'])) {
+    $ignore = [
+      'drupal/helfi_*' => 'Our own modules are rolled out by the automatic update workflow.',
+      'drupal/hdbt*' => 'Our own themes are rolled out by the automatic update workflow.',
+    ];
+
+    // Composer 2.11 and newer support the policy settings.
+    (new Process([
+      'composer', 'config', '--no-plugins', 'policy.cooldown.period', '3 days', '--no-interaction',
+    ]))
+      ->mustRun();
+    (new Process([
+      'composer', 'config', '--no-plugins', '--json', 'policy.cooldown.ignore', json_encode($ignore), '--no-interaction',
+    ]))
+      ->mustRun();
+
+    $messages[] = 'Added a 3 day Composer cooldown policy for packages other than our own.';
+  }
+
+  return new UpdateResult($messages ?: ['The Composer cooldown policy is already configured.']);
+}
