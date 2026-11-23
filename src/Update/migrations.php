@@ -265,9 +265,6 @@ function drupal_tools_update_29() : UpdateResult {
   }
   $package->dependencies->{'@hdbt/theme-builder'} = 'file:../../contrib/hdbt/theme-builder';
 
-  $package->overrides ??= new \stdClass();
-  $package->overrides->{'svg-sprite'} = (object) ['glob' => '^13.0.0'];
-
   $package->allowScripts ??= new \stdClass();
   $package->allowScripts->esbuild ??= FALSE;
   $package->allowScripts->{'@parcel/watcher'} ??= FALSE;
