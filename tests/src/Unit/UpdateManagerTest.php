@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Drupal\Tests\helfi_drupal_tools\Unit;
 
 use DrupalTools\Update\FileManager;
+use DrupalTools\Update\MissingUpdateHookException;
 use DrupalTools\Update\UpdateHookManager;
 use DrupalTools\Update\UpdateOptions;
 use PHPUnit\Framework\Attributes\Group;
@@ -89,6 +90,67 @@ class UpdateManagerTest extends TestCase {
       $this->assertSame(['message ' . $found++], $result->messages);
     }
     $this->assertEquals(2, $found);
+  }
+
+  /**
+   * Tests that an outdated schema version fails.
+   */
+  public function testMissingHooks() : void {
+    $this->filesystem->dumpFile($this->schemaFile, '2');
+    $manager = new UpdateHookManager(
+      new Filesystem(),
+      $this->prophesize(FileManager::class)->reveal(),
+      '\DrupalToolsGapTest',
+    );
+
+    $this->expectException(MissingUpdateHookException::class);
+    $this->expectExceptionMessage('Update hooks 3-4 have been removed.');
+
+    try {
+      $manager->run($this->schemaFile, new UpdateOptions());
+
+    }
+    finally {
+      // Make sure nothing was run and the schema is untouched.
+      $this->assertSame('2', file_get_contents($this->schemaFile));
+    }
+  }
+
+  /**
+   * Tests that a missing schema file fails when old hooks are removed.
+   */
+  public function testMissingHooksWithoutSchema() : void {
+    $this->filesystem->remove($this->schemaFile);
+    $manager = new UpdateHookManager(
+      new Filesystem(),
+      $this->prophesize(FileManager::class)->reveal(),
+      '\DrupalToolsGapTest',
+    );
+
+    $this->expectException(MissingUpdateHookException::class);
+    $this->expectExceptionMessage('Update hooks 1-4 have been removed');
+    $manager->run($this->schemaFile, new UpdateOptions());
+  }
+
+  /**
+   * Tests that hooks are run when the schema is right before the oldest hook.
+   */
+  public function testNoMissingHooks() : void {
+    $manager = new UpdateHookManager(
+      new Filesystem(),
+      $this->prophesize(FileManager::class)->reveal(),
+      '\DrupalToolsGapTest',
+    );
+
+    $this->filesystem->dumpFile($this->schemaFile, '4');
+    $results = $manager->run($this->schemaFile, new UpdateOptions());
+    $this->assertSame(['message 5'], $results[0]->messages);
+    $this->assertSame(['message 6'], $results[1]->messages);
+    $this->assertSame('6', file_get_contents($this->schemaFile));
+
+    // Up-to-date schema runs nothing and does not fail.
+    $this->assertEmpty($manager->run($this->schemaFile, new UpdateOptions()));
+    $this->assertSame('6', file_get_contents($this->schemaFile));
   }
 
 }

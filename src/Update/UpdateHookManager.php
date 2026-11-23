@@ -54,13 +54,47 @@ final class UpdateHookManager {
   }
 
   /**
+   * Makes sure no update hooks are missing after the current schema version.
+   *
+   * @param int $version
+   *   The current schema version.
+   *
+   * @throws \DrupalTools\Update\MissingUpdateHookException
+   */
+  private function assertNoMissingHooks(int $version) : void {
+    // Function names are returned in lowercase without the leading backslash.
+    $prefix = strtolower(ltrim($this->scope, '\\')) . '\drupal_tools_update_';
+
+    $hooks = [];
+    foreach (get_defined_functions()['user'] as $function) {
+      if (str_starts_with($function, $prefix)) {
+        $hooks[] = (int) substr($function, strlen($prefix));
+      }
+    }
+    $pending = array_filter($hooks, fn (int $hook) => $hook > $version);
+
+    if (!$pending || ($oldest = min($pending)) === $version + 1) {
+      return;
+    }
+    throw new MissingUpdateHookException(sprintf(
+      'Update hooks %d-%d have been removed.',
+      $version + 1,
+      $oldest - 1,
+    ));
+  }
+
+  /**
    * Attempts to run updates.
+   *
+   * @throws \DrupalTools\Update\MissingUpdateHookException
    */
   public function run(string $schemaFile, UpdateOptions $options) : array {
     if (!$options->runMigrations) {
       return [];
     }
-    $schema = ($this->getSchemaVersion($schemaFile) + 1);
+    $version = $this->getSchemaVersion($schemaFile);
+    $this->assertNoMissingHooks($version);
+    $schema = $version + 1;
 
     $results = [];
     for ($i = $schema; $i < 1000; $i++) {

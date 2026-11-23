@@ -32,7 +32,10 @@
             "sut/core",
             "sut/modules/contrib"
         ],
-        "files": [ "tests/fixtures/migration_fixture.php" ]
+        "files": [
+            "tests/fixtures/migration_fixture.php",
+            "tests/fixtures/migration_gap_fixture.php"
+        ]
     },
     "repositories": {
         "platform": {
