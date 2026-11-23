@@ -7,6 +7,7 @@ namespace DrupalTools\Drush\Commands;
 use Composer\InstalledVersions;
 use DrupalTools\HttpFileManager;
 use DrupalTools\Update\FileManager;
+use DrupalTools\Update\MissingUpdateHookException;
 use DrupalTools\Update\UpdateHookManager;
 use DrupalTools\Update\UpdateOptions;
 use Drush\Attributes\Bootstrap;
@@ -308,8 +309,15 @@ final class UpdateDrushCommands extends DrushCommands {
 
       return DrushCommands::EXIT_FAILURE_WITH_CLARITY;
     }
+    try {
+      $this->runUpdateHooks($options, $root);
+    }
+    catch (MissingUpdateHookException $e) {
+      $this->style->error($e->getMessage());
+
+      return DrushCommands::EXIT_FAILURE;
+    }
     $this
-      ->runUpdateHooks($options, $root)
       ->updateDefaultFiles($options)
       ->addDefaultFiles($options);
 
