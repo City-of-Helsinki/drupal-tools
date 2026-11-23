@@ -265,9 +265,6 @@ function drupal_tools_update_29() : UpdateResult {
   }
   $package->dependencies->{'@hdbt/theme-builder'} = 'file:../../contrib/hdbt/theme-builder';
 
-  $package->overrides ??= new \stdClass();
-  $package->overrides->{'svg-sprite'} = (object) ['glob' => '^13.0.0'];
-
   $package->allowScripts ??= new \stdClass();
   $package->allowScripts->esbuild ??= FALSE;
   $package->allowScripts->{'@parcel/watcher'} ??= FALSE;
@@ -337,4 +334,32 @@ function drupal_tools_update_30() : UpdateResult {
   }
 
   return new UpdateResult($messages ?: ['The Composer cooldown policy is already configured.']);
+}
+
+/**
+ * UHF-13657: Remove the svg-sprite override from hdbt_subtheme.
+ */
+function drupal_tools_update_31() : UpdateResult {
+  $file = 'public/themes/custom/hdbt_subtheme/package.json';
+
+  if (!file_exists($file)) {
+    return new UpdateResult(['Skipped, hdbt_subtheme has no package.json.']);
+  }
+  $package = json_decode((string) file_get_contents($file));
+
+  if (!isset($package->overrides->{'svg-sprite'})) {
+    return new UpdateResult(['Skipped, hdbt_subtheme has no svg-sprite override.']);
+  }
+  unset($package->overrides->{'svg-sprite'});
+
+  if (!get_object_vars($package->overrides)) {
+    unset($package->overrides);
+  }
+
+  $json = json_encode($package, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+  // Indent with two spaces like npm.
+  $json = preg_replace_callback('/^(?: {4})+/m', fn (array $matches) => str_repeat('  ', strlen($matches[0]) / 4), $json);
+  file_put_contents($file, $json . "\n");
+
+  return new UpdateResult(['Removed the svg-sprite override from hdbt_subtheme package.json.']);
 }
