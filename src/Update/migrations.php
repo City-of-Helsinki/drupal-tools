@@ -363,3 +363,14 @@ function drupal_tools_update_31() : UpdateResult {
 
   return new UpdateResult(['Removed the svg-sprite override from hdbt_subtheme package.json.']);
 }
+
+/**
+ * Remove ModuleEnabledTest, renamed to DisallowedConfigurationTest.
+ */
+function drupal_tools_update_32(UpdateOptions $options, FileManager $fileManager) : UpdateResult {
+  $fileManager->removeFiles($options, ['tests/dtt/src/ExistingSite/ModuleEnabledTest.php']);
+
+  return new UpdateResult([
+    'Removed tests/dtt/src/ExistingSite/ModuleEnabledTest.php. It was replaced by DisallowedConfigurationTest.php.',
+  ]);
+}
