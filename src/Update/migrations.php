@@ -374,3 +374,88 @@ function drupal_tools_update_32(UpdateOptions $options, FileManager $fileManager
     'Removed tests/dtt/src/ExistingSite/ModuleEnabledTest.php. It was replaced by DisallowedConfigurationTest.php.',
   ]);
 }
+
+/**
+ * Check the hdbt_subtheme lockfile against the theme builder.
+ *
+ * The preinstall script reinstalled the theme builder by path on every
+ * install, which re-resolved its dependencies each time. The theme builder
+ * now ships a check that fails the install when package-lock.json does not
+ * match its dependencies, and update-theme-builder updates the lockfile
+ * explicitly. The Update config action updates the lockfile after every hdbt
+ * release.
+ *
+ * Subthemes with React apps install the hdbt dependencies in preinstall
+ * instead of postinstall, since npm reads their file: dependencies into the
+ * hdbt node_modules before postinstall runs.
+ */
+function drupal_tools_update_33() : UpdateResult {
+  $file = 'public/themes/custom/hdbt_subtheme/package.json';
+  $builder = '../../contrib/hdbt/theme-builder';
+
+  if (!file_exists($file)) {
+    return new UpdateResult(['Skipped, hdbt_subtheme has no package.json.']);
+  }
+  $package = json_decode((string) file_get_contents($file));
+
+  if (!isset($package->dependencies->{'@hdbt/theme-builder'})) {
+    return new UpdateResult(['Skipped, hdbt_subtheme does not use the theme builder.']);
+  }
+
+  // The scripts call the check from the installed hdbt.
+  if (!file_exists('public/themes/contrib/hdbt/theme-builder/tools/check-lock.mjs')) {
+    throw new \RuntimeException('The installed drupal/hdbt has no theme-builder/tools/check-lock.mjs. Update drupal/hdbt and run the update again.');
+  }
+
+  $scripts = (array) ($package->scripts ?? []);
+  $messages = [];
+
+  $check = sprintf('node %s/tools/check-lock.mjs %s', $builder, $builder);
+  $preinstall = $check;
+
+  // Move the hdbt install of subthemes with React apps to preinstall.
+  $postinstall = $scripts['postinstall'] ?? '';
+  if (str_contains($postinstall, 'npm --prefix ../../contrib/hdbt install')) {
+    $preinstall .= ' && npm --prefix ../../contrib/hdbt ci --ignore-scripts --no-audit --no-fund';
+
+    if (preg_match('#^npm --prefix \.\./\.\./contrib/hdbt install[^&|;]*$#', $postinstall)) {
+      unset($scripts['postinstall']);
+    }
+    else {
+      $messages[] = 'Check the hdbt_subtheme postinstall script, it does more than the hdbt install: ' . $postinstall;
+    }
+  }
+
+  unset($scripts['preinstall'], $scripts['update-theme-builder']);
+  $package->scripts = (object) ([
+    'preinstall' => $preinstall,
+    'update-theme-builder' => sprintf('rm -rf node_modules/@hdbt/theme-builder && npm install %s --ignore-scripts', $builder),
+  ] + $scripts);
+
+  $comments = (array) ($package->{'@comment scripts'} ?? []);
+  $comments[] = 'preinstall checks that package-lock.json matches the theme builder from hdbt, since npm ci does not. Run update-theme-builder when it fails.';
+  if (!str_contains($preinstall, '--prefix ../../contrib/hdbt ci')) {
+    $comments[] = "If the theme bundles hdbt source, for example React components through @/react/common/*, or adds file: dependencies into ../../contrib/hdbt/node_modules, append ' && npm --prefix ../../contrib/hdbt ci --ignore-scripts --no-audit --no-fund' to preinstall.";
+  }
+  $package->{'@comment scripts'} = array_values(array_unique($comments));
+
+  // Keep the key order of package.json: @comment scripts before scripts.
+  $ordered = new \stdClass();
+  foreach (get_object_vars($package) as $key => $value) {
+    if ($key === 'scripts' && !property_exists($ordered, '@comment scripts')) {
+      $ordered->{'@comment scripts'} = $package->{'@comment scripts'};
+    }
+    if ($key !== '@comment scripts' || !property_exists($ordered, $key)) {
+      $ordered->{$key} = $value;
+    }
+  }
+
+  $json = json_encode($ordered, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+  // Indent with two spaces like npm.
+  $json = preg_replace_callback('/^(?: {4})+/m', fn (array $matches) => str_repeat('  ', strlen($matches[0]) / 4), $json);
+  file_put_contents($file, $json . "\n");
+
+  $messages[] = 'Updated hdbt_subtheme to check package-lock.json against the theme builder. Run npm run update-theme-builder in hdbt_subtheme if npm ci reports a mismatch.';
+
+  return new UpdateResult($messages);
+}
