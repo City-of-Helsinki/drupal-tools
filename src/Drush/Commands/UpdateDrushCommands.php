@@ -248,7 +248,7 @@ final class UpdateDrushCommands extends DrushCommands {
         '.sonarcloud.properties',
         '.github/pull_request_template.md',
         '.deprecation-ignore.txt',
-        'tests/dtt/src/ExistingSite/ModuleEnabledTest.php',
+        'tests/dtt/src/ExistingSite/DisallowedConfigurationTest.php',
       ])
       ->updateFiles($options, [
         '.gitignore.dist' => '.gitignore',
