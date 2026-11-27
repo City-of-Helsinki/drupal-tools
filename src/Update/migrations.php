@@ -378,16 +378,11 @@ function drupal_tools_update_32(UpdateOptions $options, FileManager $fileManager
 /**
  * Check the hdbt_subtheme lockfile against the theme builder.
  *
- * The preinstall script reinstalled the theme builder by path on every
- * install, which re-resolved its dependencies each time. The theme builder
- * now ships a check that fails the install when package-lock.json does not
- * match its dependencies, and update-theme-builder updates the lockfile
- * explicitly. The Update config action updates the lockfile after every hdbt
- * release.
+ * Old preinstall script caused potential drift between subtheme and
+ * theme-builder.
  *
- * Subthemes with React apps install the hdbt dependencies in preinstall
- * instead of postinstall, since npm reads their file: dependencies into the
- * hdbt node_modules before postinstall runs.
+ * For sites using React, moves hdbt install into preinstall (npm resolves
+ * file deps before postinstall which might cause issues).
  */
 function drupal_tools_update_33() : UpdateResult {
   $file = 'public/themes/custom/hdbt_subtheme/package.json';
